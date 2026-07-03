@@ -2,7 +2,7 @@
   "id": "f2f309be-197f-480d-985e-2c5035db5a8d",
   "name": "RGMC API Extension",
   "publisher": "RGMC ERAR",
-  "version": "1.0.0.0",
+  "version": "1.0.0.1",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -27,13 +27,13 @@
             "id": "1f4a208a-3e92-4d5c-ada4-effa705d199a",
             "name": "PHCAS",
             "publisher": "Associates 365",
-            "version": "27.1.0.4"
+            "version": "26.0.0.0"
         },
         {
             "id": "dc4b3ddf-1b1b-4caa-8683-3c9e1b6d322d",
             "name": "PHTAX",
             "publisher": "Associates 365",
-            "version": "27.3.0.0"
+            "version": "26.0.0.0"
         },
         {
             "id": "ebbae15e-25ec-4f5a-a35f-64773c7e0f57",
