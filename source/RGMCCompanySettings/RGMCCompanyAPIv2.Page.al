@@ -1,18 +1,19 @@
-page 50492 "RGMC Company API v2"
+page 50492 "RGMC Company Settings API"
 {
     PageType = API;
-    Caption = 'RGMC Company API v2';
+    Caption = 'RGMC Company Settings API';
     APIPublisher = 'rgmc';
     APIGroup = 'rgmccustom';
     APIVersion = 'v2.0';
-    EntityName = 'company';
-    EntitySetName = 'companies';
-    SourceTable = Company;
-    ODataKeyFields = SystemId;
+    EntityName = 'companySetting';
+    EntitySetName = 'companySettings';
+    SourceTable = "RGMC Company Settings";
+    ODataKeyFields = "Company Name";
     DelayedInsert = true;
     InsertAllowed = false;
     ModifyAllowed = true;
     DeleteAllowed = false;
+    InherentPermissions = X;
 
     layout
     {
@@ -25,9 +26,9 @@ page 50492 "RGMC Company API v2"
                     Caption = 'id', Locked = true;
                     Editable = false;
                 }
-                field(name; Rec.Name)
+                field(companyName; Rec."Company Name")
                 {
-                    Caption = 'name', Locked = true;
+                    Caption = 'companyName', Locked = true;
                     Editable = false;
                 }
                 field(displayName; Rec."Display Name")
@@ -40,7 +41,12 @@ page 50492 "RGMC Company API v2"
                     Caption = 'evaluationCompany', Locked = true;
                     Editable = false;
                 }
-                field(consignmentAppVisible; ConsignmentAppVisible)
+                field(businessProfileId; Rec."Business Profile Id")
+                {
+                    Caption = 'businessProfileId', Locked = true;
+                    Editable = false;
+                }
+                field(consignmentAppVisible; Rec."Consignment App Visible")
                 {
                     Caption = 'consignmentAppVisible', Locked = true;
                 }
@@ -48,30 +54,27 @@ page 50492 "RGMC Company API v2"
         }
     }
 
-    trigger OnAfterGetRecord()
+    trigger OnOpenPage()
     var
+        Company: Record Company;
         CompanySettings: Record "RGMC Company Settings";
     begin
-        if CompanySettings.Get(Rec.Name) then
-            ConsignmentAppVisible := CompanySettings."Consignment App Visible"
-        else
-            ConsignmentAppVisible := false;
+        if Company.FindSet() then
+            repeat
+                if not CompanySettings.Get(Company.Name) then begin
+                    CompanySettings.Init();
+                    CompanySettings."Company Name" := Company.Name;
+                    CompanySettings."Display Name" := Company."Display Name";
+                    CompanySettings."Evaluation Company" := Company."Evaluation Company";
+                    CompanySettings."Business Profile Id" := Company."Business Profile Id";
+                    CompanySettings."Consignment App Visible" := false;
+                    CompanySettings.Insert(true);
+                end else begin
+                    CompanySettings."Display Name" := Company."Display Name";
+                    CompanySettings."Evaluation Company" := Company."Evaluation Company";
+                    CompanySettings."Business Profile Id" := Company."Business Profile Id";
+                    CompanySettings.Modify(true);
+                end;
+            until Company.Next() = 0;
     end;
-
-    trigger OnModifyRecord(): Boolean
-    var
-        CompanySettings: Record "RGMC Company Settings";
-    begin
-        if not CompanySettings.Get(Rec.Name) then begin
-            CompanySettings.Init();
-            CompanySettings."Company Name" := Rec.Name;
-            CompanySettings.Insert(true);
-        end;
-        CompanySettings."Consignment App Visible" := ConsignmentAppVisible;
-        CompanySettings.Modify(true);
-        exit(false);
-    end;
-
-    var
-        ConsignmentAppVisible: Boolean;
 }
