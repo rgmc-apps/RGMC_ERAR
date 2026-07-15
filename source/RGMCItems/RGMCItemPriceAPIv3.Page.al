@@ -96,6 +96,9 @@ page 50318 "RGMC Item Price API v3"
         FilterDate: Date;
         EntryNo: Integer;
         HasPrev: Boolean;
+        FamilyFilter: Code[20];
+        FamilyItem: Record Item;
+        FamilyItemFilter: Text;
     begin
         // Read onDate from consumer's $filter=onDate eq 2026-07-13; default to WorkDate
         if Rec.GetFilter("On Date") <> '' then
@@ -103,12 +106,32 @@ page 50318 "RGMC Item Price API v3"
         if FilterDate = 0D then
             FilterDate := WorkDate();
 
+        // If a familyCode filter was sent ($filter=familyCode eq 'CODE'), resolve the
+        // matching item numbers upfront so we can push a Product No. filter down to SQL.
+        // Without this, BC would scan all price lines and then filter the temp buffer —
+        // pre-filtering at the PriceListLine level is dramatically faster.
+        FamilyFilter := Rec.GetRangeMin("Family Code");
+        if FamilyFilter <> '' then begin
+            FamilyItem.SetRange("LSC Item Family Code", FamilyFilter);
+            if FamilyItem.FindSet() then
+                repeat
+                    if FamilyItemFilter = '' then
+                        FamilyItemFilter := FamilyItem."No."
+                    else
+                        FamilyItemFilter += '|' + FamilyItem."No.";
+                until FamilyItem.Next() = 0;
+            if FamilyItemFilter = '' then
+                exit; // No items belong to this family — nothing to return
+        end;
+
         // Single pass sorted by (Product No., Starting Date) ASC:
         // Within each product group, records arrive oldest-first so the last record
         // seen before the product changes is always the highest Starting Date <= onDate.
         PriceListLine.SetCurrentKey("Product No.", "Starting Date");
         PriceListLine.SetFilter("Price List Code", '<>*IC*');
         PriceListLine.SetFilter("Starting Date", '<=%1', FilterDate);
+        if FamilyItemFilter <> '' then
+            PriceListLine.SetFilter("Product No.", FamilyItemFilter);
 
         HasPrev := false;
         if PriceListLine.FindSet() then
