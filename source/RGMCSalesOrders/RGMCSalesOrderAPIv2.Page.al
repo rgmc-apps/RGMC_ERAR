@@ -84,6 +84,10 @@ page 50315 "RGMC Sales Order API v2"
             {
                 Caption = 'shortcutDimension2Code';
             }
+            field(submittedBy; Rec."Submitted By")
+            {
+                Caption = 'submittedBy';
+            }
             field(lastModifiedDateTime; Rec.SystemModifiedAt)
             {
                 Caption = 'lastModifiedDateTime';

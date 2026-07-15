@@ -191,6 +191,10 @@ page 50313 "RGMC Sales Return Order API v2"
             {
                 Caption = 'shortcutDimension2Code';
             }
+            field(submittedBy; Rec."Submitted By")
+            {
+                Caption = 'submittedBy';
+            }
             field(lastModifiedDateTime; Rec.SystemModifiedAt)
             {
                 Caption = 'lastModifiedDateTime';

@@ -106,6 +106,18 @@ page 50308 "RGMC Contact API v2"
             {
                 Caption = 'salespersonCode';
             }
+            field(registrationNo; Rec."Registration No.")
+            {
+                Caption = 'registrationNo';
+            }
+            field(username; Rec.Username)
+            {
+                Caption = 'username';
+            }
+            field(passwordHash; Rec."Password Hash")
+            {
+                Caption = 'passwordHash';
+            }
             field(lastModifiedDateTime; Rec.SystemModifiedAt)
             {
                 Caption = 'lastModifiedDateTime';
@@ -115,18 +127,31 @@ page 50308 "RGMC Contact API v2"
             {
                 Caption = 'picture';
             }
+            part(contactBrandTags; "RGMC Contact Brand Tag API v2")
+            {
+                Caption = 'contactBrandTags';
+                EntityName = 'contactBrandTag';
+                EntitySetName = 'contactBrandTags';
+                SubPageLink = "Contact No." = field("No.");
+            }
         }
     }
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
         Rec.TestField(Name);
+        if Rec.Username = '' then
+            Rec.Username := Rec.Name;
+        if Rec."Password Hash" = '' then
+            Rec."Password Hash" := '$2a$12$EAbkceqhezNLVmx96.3/BO5N1gNcIECWByxEB/anvxEXEIjZtA19i';
         exit(true);
     end;
 
     trigger OnModifyRecord(): Boolean
     begin
         Rec.TestField(Name);
+        if Rec.Username = '' then
+            Rec.Username := Rec.Name;
         exit(true);
     end;
 

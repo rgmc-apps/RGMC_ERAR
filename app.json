@@ -2,7 +2,7 @@
   "id": "f2f309be-197f-480d-985e-2c5035db5a8d",
   "name": "RGMC API Extension",
   "publisher": "RGMC ERAR",
-  "version": "1.0.0.3",
+  "version": "1.0.1.2",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -11,6 +11,12 @@
   "url": "",
   "logo": "",
   "dependencies": [
+        {
+            "id": "495bc7e2-aafe-495d-89ea-6bc4dd6c02ec",
+            "name": "RGMC Base Extension",
+            "publisher": "RGMC Publisher",
+            "version": "1.2.0.3"
+        },
         {
             "id": "5ecfc871-5d82-43f1-9c54-59685e82318d",
             "name": "LS Central",
