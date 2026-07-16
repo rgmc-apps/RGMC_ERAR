@@ -86,6 +86,51 @@ page 50318 "RGMC Item Price API v3"
                 Caption = 'familyCode';
                 Editable = false;
             }
+            field(itemId; Rec."Item Id")
+            {
+                Caption = 'itemId';
+                Editable = false;
+            }
+            field(description; Rec."Description")
+            {
+                Caption = 'description';
+                Editable = false;
+            }
+            field(description2; Rec."Description 2")
+            {
+                Caption = 'description2';
+                Editable = false;
+            }
+            field(baseUnitOfMeasure; Rec."Base Unit of Measure")
+            {
+                Caption = 'baseUnitOfMeasure';
+                Editable = false;
+            }
+            field(itemUnitPrice; Rec."Item Unit Price")
+            {
+                Caption = 'itemUnitPrice';
+                Editable = false;
+            }
+            field(unitCost; Rec."Unit Cost")
+            {
+                Caption = 'unitCost';
+                Editable = false;
+            }
+            field(itemCategoryCode; Rec."Item Category Code")
+            {
+                Caption = 'itemCategoryCode';
+                Editable = false;
+            }
+            field(blocked; Rec."Blocked")
+            {
+                Caption = 'blocked';
+                Editable = false;
+            }
+            field(lastModifiedDateTime; Rec."Item Last Modified At")
+            {
+                Caption = 'lastModifiedDateTime';
+                Editable = false;
+            }
         }
     }
 
@@ -99,6 +144,7 @@ page 50318 "RGMC Item Price API v3"
         FamilyFilter: Code[20];
         FamilyItem: Record Item;
         FamilyItemFilter: Text;
+        ProductNoFilter: Text;
     begin
         // Read onDate from consumer's $filter=onDate eq 2026-07-13; default to WorkDate
         if Rec.GetFilter("On Date") <> '' then
@@ -110,7 +156,8 @@ page 50318 "RGMC Item Price API v3"
         // matching item numbers upfront so we can push a Product No. filter down to SQL.
         // Without this, BC would scan all price lines and then filter the temp buffer —
         // pre-filtering at the PriceListLine level is dramatically faster.
-        FamilyFilter := Rec.GetRangeMin("Family Code");
+        if Rec.GetFilter("Family Code") <> '' then
+            FamilyFilter := Rec.GetRangeMin("Family Code");
         if FamilyFilter <> '' then begin
             FamilyItem.SetRange("LSC Item Family Code", FamilyFilter);
             if FamilyItem.FindSet() then
@@ -124,24 +171,47 @@ page 50318 "RGMC Item Price API v3"
                 exit; // No items belong to this family — nothing to return
         end;
 
-        // Single pass sorted by (Product No., Starting Date) ASC:
-        // Within each product group, records arrive oldest-first so the last record
-        // seen before the product changes is always the highest Starting Date <= onDate.
+        // Product No. range filter — supports parallel range fetching from the bc-api.
+        // The consumer sends $filter=productNo ge 'A' and productNo lt 'M' (OData range).
+        // BC translates this to an AL filter on Rec."Product No." before OnOpenPage runs.
+        // We copy it to PriceListLine so the SQL engine uses the ("Product No.", "Starting Date")
+        // index for a range scan instead of a full table scan — genuine server-side work reduction.
+        // FamilyItemFilter takes priority when both are provided (it is already more specific).
+        if FamilyItemFilter = '' then
+            ProductNoFilter := Rec.GetFilter("Product No.");
+
+        // Single pass sorted by (Product No., Starting Date) ASC.
+        // SQL filter is intentionally minimal — only the Starting Date range — because
+        // adding Status or Ending Date WHERE clauses disrupts the (Product No., Starting Date)
+        // index and forces a worse query plan that times out on large tables.
+        // Status, Ending Date, and IC are all checked in AL after each row is fetched.
+        // SetLoadFields limits the SELECT to only the columns used in the loop and in
+        // InsertPriceLine. Price List Line in LS Central is very wide (many extension
+        // fields); without this, BC fetches all columns for every row — on a large
+        // table this is enough data transfer to hit the 30-second cloud query timeout.
+        PriceListLine.SetLoadFields(
+            "Product No.", "Price List Code", "Starting Date", "Ending Date",
+            "Unit Price", "LSC Unit Price Including VAT", "Assign-to No.",
+            "Currency Code", "Unit of Measure Code", "Minimum Quantity"
+        );
         PriceListLine.SetCurrentKey("Product No.", "Starting Date");
-        PriceListLine.SetFilter("Price List Code", '<>*IC*');
         PriceListLine.SetFilter("Starting Date", '<=%1', FilterDate);
         if FamilyItemFilter <> '' then
-            PriceListLine.SetFilter("Product No.", FamilyItemFilter);
+            PriceListLine.SetFilter("Product No.", FamilyItemFilter)
+        else if ProductNoFilter <> '' then
+            PriceListLine.SetFilter("Product No.", ProductNoFilter);
 
         HasPrev := false;
         if PriceListLine.FindSet() then
             repeat
-                if HasPrev and (PrevLine."Product No." <> PriceListLine."Product No.") then begin
-                    EntryNo += 1;
-                    InsertPriceLine(PrevLine, EntryNo, FilterDate);
+                if StrPos(PriceListLine."Price List Code", 'IC') = 0 then begin
+                    if HasPrev and (PrevLine."Product No." <> PriceListLine."Product No.") then begin
+                        EntryNo += 1;
+                        InsertPriceLine(PrevLine, EntryNo, FilterDate);
+                    end;
+                    PrevLine := PriceListLine;
+                    HasPrev := true;
                 end;
-                PrevLine := PriceListLine;
-                HasPrev := true;
             until PriceListLine.Next() = 0;
 
         // Flush the last product
@@ -168,8 +238,26 @@ page 50318 "RGMC Item Price API v3"
         Rec."Unit of Measure Code" := SourceLine."Unit of Measure Code";
         Rec."Minimum Quantity" := SourceLine."Minimum Quantity";
         Rec."On Date" := FilterDate;
-        if Item.Get(SourceLine."Product No.") then
+        // SetLoadFields limits the SELECT to only the columns we need, which matters
+        // for the Item table in LS Central where extensions add many extra fields.
+        Item.SetLoadFields(
+            "LSC Item Family Code", SystemId, Description, "Description 2",
+            "Base Unit of Measure", "Unit Price", "Unit Cost",
+            "Item Category Code", Blocked, SystemModifiedAt
+        );
+        if Item.Get(SourceLine."Product No.") then begin
             Rec."Family Code" := Item."LSC Item Family Code";
+            Rec."Item Id" := Item.SystemId;
+            Rec."Description" := Item.Description;
+            Rec."Description 2" := Item."Description 2";
+            Rec."Base Unit of Measure" := Item."Base Unit of Measure";
+            Rec."Item Unit Price" := Item."Unit Price";
+            Rec."Unit Cost" := Item."Unit Cost";
+            Rec."Item Category Code" := Item."Item Category Code";
+            Rec."Blocked" := Item.Blocked;
+            Rec."Item Last Modified At" := Item.SystemModifiedAt;
+        end;
         Rec.Insert(false);
     end;
+
 }

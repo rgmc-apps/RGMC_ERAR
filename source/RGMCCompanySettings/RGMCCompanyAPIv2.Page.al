@@ -70,10 +70,16 @@ page 50492 "RGMC Company Settings API"
                     CompanySettings."Consignment App Visible" := false;
                     CompanySettings.Insert(true);
                 end else begin
-                    CompanySettings."Display Name" := Company."Display Name";
-                    CompanySettings."Evaluation Company" := Company."Evaluation Company";
-                    CompanySettings."Business Profile Id" := Company."Business Profile Id";
-                    CompanySettings.Modify(true);
+                    // Only write if something actually changed — avoids a write lock on every GET
+                    if (CompanySettings."Display Name" <> Company."Display Name") or
+                       (CompanySettings."Evaluation Company" <> Company."Evaluation Company") or
+                       (CompanySettings."Business Profile Id" <> Company."Business Profile Id")
+                    then begin
+                        CompanySettings."Display Name" := Company."Display Name";
+                        CompanySettings."Evaluation Company" := Company."Evaluation Company";
+                        CompanySettings."Business Profile Id" := Company."Business Profile Id";
+                        CompanySettings.Modify(true);
+                    end;
                 end;
             until Company.Next() = 0;
     end;

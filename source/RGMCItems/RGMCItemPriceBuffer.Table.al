@@ -71,10 +71,56 @@ table 50302 "RGMC Item Price Buffer"
             Caption = 'Family Code';
             DataClassification = CustomerContent;
         }
+        field(14; "Item Id"; Guid)
+        {
+            Caption = 'Item Id';
+            DataClassification = CustomerContent;
+        }
+        field(15; "Description"; Text[100])
+        {
+            Caption = 'Description';
+            DataClassification = CustomerContent;
+        }
+        field(16; "Description 2"; Text[50])
+        {
+            Caption = 'Description 2';
+            DataClassification = CustomerContent;
+        }
+        field(17; "Base Unit of Measure"; Code[10])
+        {
+            Caption = 'Base Unit of Measure';
+            DataClassification = CustomerContent;
+        }
+        field(18; "Item Unit Price"; Decimal)
+        {
+            Caption = 'Item Unit Price';
+            DataClassification = CustomerContent;
+        }
+        field(19; "Unit Cost"; Decimal)
+        {
+            Caption = 'Unit Cost';
+            DataClassification = CustomerContent;
+        }
+        field(20; "Item Category Code"; Code[20])
+        {
+            Caption = 'Item Category Code';
+            DataClassification = CustomerContent;
+        }
+        field(21; "Blocked"; Boolean)
+        {
+            Caption = 'Blocked';
+            DataClassification = CustomerContent;
+        }
+        field(22; "Item Last Modified At"; DateTime)
+        {
+            Caption = 'Item Last Modified At';
+            DataClassification = CustomerContent;
+        }
     }
 
     keys
     {
         key(PK; "Entry No.") { Clustered = true; }
+        key(ProductNo; "Product No.") { }
     }
 }

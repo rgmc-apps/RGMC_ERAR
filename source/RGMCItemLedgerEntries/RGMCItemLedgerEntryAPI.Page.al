@@ -9,6 +9,9 @@ page 50304 "RGMC Item Ledger Entry API"
     EntitySetName = 'itemLedgerEntries';
     SourceTable = "Item Ledger Entry";
     DelayedInsert = true;
+    InsertAllowed = false;
+    ModifyAllowed = false;
+    DeleteAllowed = false;
     ODataKeyFields = systemId;
 
     layout
