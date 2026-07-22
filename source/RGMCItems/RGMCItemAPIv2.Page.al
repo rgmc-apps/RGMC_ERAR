@@ -77,4 +77,17 @@ page 50310 "RGMC Item API v2"
             }
         }
     }
+
+    trigger OnOpenPage()
+    begin
+        // Item in LS Central carries dozens of extension columns from LSC and other apps.
+        // Limiting the SELECT to only the fields this page exposes cuts data transfer
+        // substantially on every GET request.
+        Rec.SetLoadFields(
+            SystemId, "No.", Description, "Description 2",
+            "Item Category Code", "LSC Item Family Code",
+            "Base Unit of Measure", "Unit Price", "Unit Cost",
+            Blocked, SystemModifiedAt
+        );
+    end;
 }

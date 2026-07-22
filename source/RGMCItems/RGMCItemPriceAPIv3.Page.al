@@ -131,6 +131,16 @@ page 50318 "RGMC Item Price API v3"
                 Caption = 'lastModifiedDateTime';
                 Editable = false;
             }
+            field(limit; Rec."Limit")
+            {
+                Caption = 'limit';
+                Editable = false;
+            }
+            field(offset; Rec."Offset")
+            {
+                Caption = 'offset';
+                Editable = false;
+            }
         }
     }
 
@@ -139,12 +149,17 @@ page 50318 "RGMC Item Price API v3"
         PriceListLine: Record "Price List Line";
         PrevLine: Record "Price List Line";
         FilterDate: Date;
-        EntryNo: Integer;
         HasPrev: Boolean;
         FamilyFilter: Code[20];
-        FamilyItem: Record Item;
         FamilyItemFilter: Text;
         ProductNoFilter: Text;
+        Item: Record Item;
+        TempItem: Record Item temporary;
+        RequestedLimit: Integer;
+        EffectiveLimit: Integer;
+        EffectiveOffset: Integer;
+        Position: Integer;
+        InsertCount: Integer;
     begin
         // Read onDate from consumer's $filter=onDate eq 2026-07-13; default to WorkDate
         if Rec.GetFilter("On Date") <> '' then
@@ -152,43 +167,76 @@ page 50318 "RGMC Item Price API v3"
         if FilterDate = 0D then
             FilterDate := WorkDate();
 
-        // If a familyCode filter was sent ($filter=familyCode eq 'CODE'), resolve the
-        // matching item numbers upfront so we can push a Product No. filter down to SQL.
-        // Without this, BC would scan all price lines and then filter the temp buffer —
-        // pre-filtering at the PriceListLine level is dramatically faster.
         if Rec.GetFilter("Family Code") <> '' then
             FamilyFilter := Rec.GetRangeMin("Family Code");
-        if FamilyFilter <> '' then begin
-            FamilyItem.SetRange("LSC Item Family Code", FamilyFilter);
-            if FamilyItem.FindSet() then
-                repeat
-                    if FamilyItemFilter = '' then
-                        FamilyItemFilter := FamilyItem."No."
-                    else
-                        FamilyItemFilter += '|' + FamilyItem."No.";
-                until FamilyItem.Next() = 0;
-            if FamilyItemFilter = '' then
-                exit; // No items belong to this family — nothing to return
-        end;
 
-        // Product No. range filter — supports parallel range fetching from the bc-api.
-        // The consumer sends $filter=productNo ge 'A' and productNo lt 'M' (OData range).
-        // BC translates this to an AL filter on Rec."Product No." before OnOpenPage runs.
-        // We copy it to PriceListLine so the SQL engine uses the ("Product No.", "Starting Date")
-        // index for a range scan instead of a full table scan — genuine server-side work reduction.
-        // FamilyItemFilter takes priority when both are provided (it is already more specific).
-        if FamilyItemFilter = '' then
+        // Read limit/offset — RequestedLimit=0 means "no limit" and is echoed back as-is
+        RequestedLimit := 0;
+        if Rec.GetFilter("Limit") <> '' then
+            RequestedLimit := Rec.GetRangeMin("Limit");
+        EffectiveLimit := RequestedLimit;
+        if EffectiveLimit <= 0 then
+            EffectiveLimit := 2147483647;
+
+        EffectiveOffset := 0;
+        if Rec.GetFilter("Offset") <> '' then
+            EffectiveOffset := Rec.GetRangeMin("Offset");
+
+        // Single Item query that both populates TempItem and (when family-filtered)
+        // derives the product-no pipe string used to narrow PriceListLine at SQL level.
+        //
+        // Previously the family path issued two separate Item reads: one with
+        // SetRange("LSC Item Family Code") to collect item nos, then a second with
+        // SetFilter("No.", <pipe-string>) to load TempItem. Now one query does both —
+        // SQL sees a simple equality predicate on "LSC Item Family Code" which it can
+        // satisfy with an index seek, rather than the large IN-list that the old
+        // pipe-string approach produced.
+        //
+        // SetLoadFields keeps the SELECT narrow — Item in LS Central carries many
+        // extension columns; fetching all of them multiplies data transfer unnecessarily.
+        Item.SetLoadFields(
+            "No.", "LSC Item Family Code", SystemId, Description, "Description 2",
+            "Base Unit of Measure", "Unit Price", "Unit Cost",
+            "Item Category Code", Blocked, SystemModifiedAt
+        );
+        if FamilyFilter <> '' then begin
+            Item.SetRange("LSC Item Family Code", FamilyFilter);
+            if not Item.FindSet() then
+                exit; // No items in this family — nothing to return
+            repeat
+                TempItem := Item;
+                TempItem.Insert();
+                if FamilyItemFilter = '' then
+                    FamilyItemFilter := Item."No."
+                else
+                    FamilyItemFilter += '|' + Item."No.";
+            until Item.Next() = 0;
+        end else begin
+            // Product No. range filter — supports parallel range fetching from the bc-api.
+            // The consumer sends $filter=productNo ge 'A' and productNo lt 'M' (OData range).
+            // BC translates this to an AL filter on Rec."Product No." before OnOpenPage runs.
+            // We forward it to both Item and PriceListLine so SQL does a range scan on the
+            // ("Product No.", "Starting Date") index instead of a full table scan.
             ProductNoFilter := Rec.GetFilter("Product No.");
+            if ProductNoFilter <> '' then
+                Item.SetFilter("No.", ProductNoFilter);
+            if not Item.FindSet() then
+                exit; // No items match — skip the entire PriceListLine scan
+            repeat
+                TempItem := Item;
+                TempItem.Insert();
+            until Item.Next() = 0;
+        end;
 
         // Single pass sorted by (Product No., Starting Date) ASC.
         // SQL filter is intentionally minimal — only the Starting Date range — because
-        // adding Status or Ending Date WHERE clauses disrupts the (Product No., Starting Date)
+        // adding Status or Ending Date WHERE clauses disrupts the ("Product No.", "Starting Date")
         // index and forces a worse query plan that times out on large tables.
-        // Status, Ending Date, and IC are all checked in AL after each row is fetched.
-        // SetLoadFields limits the SELECT to only the columns used in the loop and in
-        // InsertPriceLine. Price List Line in LS Central is very wide (many extension
-        // fields); without this, BC fetches all columns for every row — on a large
-        // table this is enough data transfer to hit the 30-second cloud query timeout.
+        // IC and Ending Date are checked in AL after each row is fetched (free — both
+        // fields are already included in SetLoadFields below).
+        // SetLoadFields limits the SELECT to only the columns we use — Price List Line in
+        // LS Central is very wide; without this, BC fetches all columns for every row,
+        // enough data transfer to hit the 30-second cloud query timeout on large tables.
         PriceListLine.SetLoadFields(
             "Product No.", "Price List Code", "Starting Date", "Ending Date",
             "Unit Price", "LSC Unit Price Including VAT", "Assign-to No.",
@@ -201,29 +249,42 @@ page 50318 "RGMC Item Price API v3"
         else if ProductNoFilter <> '' then
             PriceListLine.SetFilter("Product No.", ProductNoFilter);
 
+        // Position counts every product that would be returned (before offset/limit).
+        // InsertCount counts records actually inserted into Rec.
+        // The loop exits early once InsertCount reaches EffectiveLimit — avoids scanning
+        // the remainder of PriceListLine when the requested page is already complete.
         HasPrev := false;
+        Position := 0;
+        InsertCount := 0;
         if PriceListLine.FindSet() then
             repeat
-                if StrPos(PriceListLine."Price List Code", 'IC') = 0 then begin
+                // Skip IC inter-company lines and expired lines (Ending Date already loaded — no extra cost).
+                if (StrPos(PriceListLine."Price List Code", 'IC') = 0) and
+                   ((PriceListLine."Ending Date" = 0D) or (PriceListLine."Ending Date" >= FilterDate))
+                then begin
                     if HasPrev and (PrevLine."Product No." <> PriceListLine."Product No.") then begin
-                        EntryNo += 1;
-                        InsertPriceLine(PrevLine, EntryNo, FilterDate);
+                        Position += 1;
+                        if Position > EffectiveOffset then begin
+                            InsertCount += 1;
+                            InsertPriceLine(PrevLine, InsertCount, FilterDate, TempItem, RequestedLimit, EffectiveOffset);
+                        end;
                     end;
                     PrevLine := PriceListLine;
                     HasPrev := true;
                 end;
-            until PriceListLine.Next() = 0;
+            until (PriceListLine.Next() = 0) or (InsertCount >= EffectiveLimit);
 
-        // Flush the last product
-        if HasPrev then begin
-            EntryNo += 1;
-            InsertPriceLine(PrevLine, EntryNo, FilterDate);
+        // Flush the last product (skipped when the limit was already reached in the loop)
+        if HasPrev and (InsertCount < EffectiveLimit) then begin
+            Position += 1;
+            if Position > EffectiveOffset then begin
+                InsertCount += 1;
+                InsertPriceLine(PrevLine, InsertCount, FilterDate, TempItem, RequestedLimit, EffectiveOffset);
+            end;
         end;
     end;
 
-    local procedure InsertPriceLine(SourceLine: Record "Price List Line"; EntryNo: Integer; FilterDate: Date)
-    var
-        Item: Record Item;
+    local procedure InsertPriceLine(SourceLine: Record "Price List Line"; EntryNo: Integer; FilterDate: Date; var TempItem: Record Item; EchoLimit: Integer; EchoOffset: Integer)
     begin
         Rec.Init();
         Rec."Entry No." := EntryNo;
@@ -238,25 +299,20 @@ page 50318 "RGMC Item Price API v3"
         Rec."Unit of Measure Code" := SourceLine."Unit of Measure Code";
         Rec."Minimum Quantity" := SourceLine."Minimum Quantity";
         Rec."On Date" := FilterDate;
-        // SetLoadFields limits the SELECT to only the columns we need, which matters
-        // for the Item table in LS Central where extensions add many extra fields.
-        Item.SetLoadFields(
-            "LSC Item Family Code", SystemId, Description, "Description 2",
-            "Base Unit of Measure", "Unit Price", "Unit Cost",
-            "Item Category Code", Blocked, SystemModifiedAt
-        );
-        if Item.Get(SourceLine."Product No.") then begin
-            Rec."Family Code" := Item."LSC Item Family Code";
-            Rec."Item Id" := Item.SystemId;
-            Rec."Description" := Item.Description;
-            Rec."Description 2" := Item."Description 2";
-            Rec."Base Unit of Measure" := Item."Base Unit of Measure";
-            Rec."Item Unit Price" := Item."Unit Price";
-            Rec."Unit Cost" := Item."Unit Cost";
-            Rec."Item Category Code" := Item."Item Category Code";
-            Rec."Blocked" := Item.Blocked;
-            Rec."Item Last Modified At" := Item.SystemModifiedAt;
+        if TempItem.Get(SourceLine."Product No.") then begin
+            Rec."Family Code" := TempItem."LSC Item Family Code";
+            Rec."Item Id" := TempItem.SystemId;
+            Rec."Description" := TempItem.Description;
+            Rec."Description 2" := TempItem."Description 2";
+            Rec."Base Unit of Measure" := TempItem."Base Unit of Measure";
+            Rec."Item Unit Price" := TempItem."Unit Price";
+            Rec."Unit Cost" := TempItem."Unit Cost";
+            Rec."Item Category Code" := TempItem."Item Category Code";
+            Rec."Blocked" := TempItem.Blocked;
+            Rec."Item Last Modified At" := TempItem.SystemModifiedAt;
         end;
+        Rec."Limit" := EchoLimit;
+        Rec."Offset" := EchoOffset;
         Rec.Insert(false);
     end;
 

@@ -116,6 +116,16 @@ table 50302 "RGMC Item Price Buffer"
             Caption = 'Item Last Modified At';
             DataClassification = CustomerContent;
         }
+        field(23; "Limit"; Integer)
+        {
+            Caption = 'Limit';
+            DataClassification = CustomerContent;
+        }
+        field(24; "Offset"; Integer)
+        {
+            Caption = 'Offset';
+            DataClassification = CustomerContent;
+        }
     }
 
     keys

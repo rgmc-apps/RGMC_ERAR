@@ -59,6 +59,7 @@ page 50492 "RGMC Company Settings API"
         Company: Record Company;
         CompanySettings: Record "RGMC Company Settings";
     begin
+        Company.SetLoadFields(Name, "Display Name", "Evaluation Company", "Business Profile Id");
         if Company.FindSet() then
             repeat
                 if not CompanySettings.Get(Company.Name) then begin

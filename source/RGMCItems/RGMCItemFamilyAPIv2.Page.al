@@ -42,4 +42,9 @@ page 50311 "RGMC Item Family API v2"
             }
         }
     }
+
+    trigger OnOpenPage()
+    begin
+        Rec.SetLoadFields(SystemId, Code, Description, SystemModifiedAt);
+    end;
 }

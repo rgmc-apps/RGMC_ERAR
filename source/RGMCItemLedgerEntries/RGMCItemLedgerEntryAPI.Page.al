@@ -113,4 +113,18 @@ page 50304 "RGMC Item Ledger Entry API"
             }
         }
     }
+
+    trigger OnOpenPage()
+    begin
+        // Item Ledger Entry is one of the widest, highest-volume tables in BC.
+        // Without SetLoadFields every API call fetches all columns for every row —
+        // a significant SQL data-transfer cost on large tenants.
+        Rec.SetLoadFields(
+            SystemId, "Entry No.", "Item No.", "Posting Date", "Entry Type",
+            "Source Type", "Source No.", "Document No.", "Document Type",
+            Description, "Location Code", "Variant Code", "Serial No.", "Lot No.",
+            Quantity, "Invoiced Quantity", "Remaining Quantity", "Unit of Measure Code",
+            Open, Positive, "Global Dimension 1 Code", "Global Dimension 2 Code"
+        );
+    end;
 }

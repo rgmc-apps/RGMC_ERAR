@@ -84,8 +84,11 @@ page 50306 "RGMC Customer API v2"
         }
     }
 
-    trigger OnAfterGetRecord()
+    trigger OnOpenPage()
     begin
-        Rec.CalcFields("Brand");
+        // SetAutoCalcFields replaces CalcFields("Brand") in OnAfterGetRecord.
+        // BC calculates the FlowField at fetch time rather than in a separate call
+        // per record, eliminating one round-trip per row on every GET request.
+        Rec.SetAutoCalcFields("Brand");
     end;
 }
