@@ -240,7 +240,8 @@ page 50318 "RGMC Item Price API v3"
         PriceListLine.SetLoadFields(
             "Product No.", "Price List Code", "Starting Date", "Ending Date",
             "Unit Price", "LSC Unit Price Including VAT", "Assign-to No.",
-            "Currency Code", "Unit of Measure Code", "Minimum Quantity"
+            "Currency Code", "Unit of Measure Code", "Minimum Quantity",
+            Status
         );
         PriceListLine.SetCurrentKey("Product No.", "Starting Date");
         PriceListLine.SetFilter("Starting Date", '<=%1', FilterDate);
@@ -258,8 +259,11 @@ page 50318 "RGMC Item Price API v3"
         InsertCount := 0;
         if PriceListLine.FindSet() then
             repeat
-                // Skip IC inter-company lines and expired lines (Ending Date already loaded — no extra cost).
-                if (StrPos(PriceListLine."Price List Code", 'IC') = 0) and
+                // Skip Draft/Inactive lines, IC inter-company lines, and expired lines.
+                // Status is loaded via SetLoadFields — checked in AL, not SQL, so the
+                // ("Product No.", "Starting Date") index plan is preserved.
+                if (PriceListLine.Status = "Price Status"::Active) and
+                   (StrPos(PriceListLine."Price List Code", 'IC') = 0) and
                    ((PriceListLine."Ending Date" = 0D) or (PriceListLine."Ending Date" >= FilterDate))
                 then begin
                     if HasPrev and (PrevLine."Product No." <> PriceListLine."Product No.") then begin
