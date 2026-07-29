@@ -148,10 +148,13 @@ page 50318 "RGMC Item Price API v3"
     var
         PriceListLine: Record "Price List Line";
         PrevLine: Record "Price List Line";
+        PriceListHeader: Record "Price List Header";
         FilterDate: Date;
         HasPrev: Boolean;
         FamilyFilter: Code[20];
         FamilyItemFilter: Text;
+        PriceListCodeFilter: Text;
+        RequestedPLFilter: Text;
         ProductNoFilter: Text;
         Item: Record Item;
         TempItem: Record Item temporary;
@@ -170,6 +173,8 @@ page 50318 "RGMC Item Price API v3"
         if Rec.GetFilter("Family Code") <> '' then
             FamilyFilter := Rec.GetRangeMin("Family Code");
 
+        RequestedPLFilter := Rec.GetFilter("Price List Code");
+
         // Read limit/offset — RequestedLimit=0 means "no limit" and is echoed back as-is
         RequestedLimit := 0;
         if Rec.GetFilter("Limit") <> '' then
@@ -182,16 +187,6 @@ page 50318 "RGMC Item Price API v3"
         if Rec.GetFilter("Offset") <> '' then
             EffectiveOffset := Rec.GetRangeMin("Offset");
 
-        // Single Item query that both populates TempItem and (when family-filtered)
-        // derives the product-no pipe string used to narrow PriceListLine at SQL level.
-        //
-        // Previously the family path issued two separate Item reads: one with
-        // SetRange("LSC Item Family Code") to collect item nos, then a second with
-        // SetFilter("No.", <pipe-string>) to load TempItem. Now one query does both —
-        // SQL sees a simple equality predicate on "LSC Item Family Code" which it can
-        // satisfy with an index seek, rather than the large IN-list that the old
-        // pipe-string approach produced.
-        //
         // SetLoadFields keeps the SELECT narrow — Item in LS Central carries many
         // extension columns; fetching all of them multiplies data transfer unnecessarily.
         Item.SetLoadFields(
@@ -206,11 +201,30 @@ page 50318 "RGMC Item Price API v3"
             repeat
                 TempItem := Item;
                 TempItem.Insert();
-                if FamilyItemFilter = '' then
-                    FamilyItemFilter := Item."No."
-                else
-                    FamilyItemFilter += '|' + Item."No.";
             until Item.Next() = 0;
+
+            // Fast path: Price List Headers tagged with this family code give us a small
+            // set of price list codes to filter on — far fewer SQL predicates than a
+            // product-number pipe-string that grows with family size.
+            PriceListHeader.SetLoadFields(Code);
+            PriceListHeader.SetRange("Item Family Code", FamilyFilter);
+            if PriceListHeader.FindSet() then
+                repeat
+                    if PriceListCodeFilter = '' then
+                        PriceListCodeFilter := PriceListHeader.Code
+                    else
+                        PriceListCodeFilter += '|' + PriceListHeader.Code;
+                until PriceListHeader.Next() = 0;
+
+            // Fallback: no headers tagged — build product-number pipe-string from TempItem.
+            if PriceListCodeFilter = '' then
+                if TempItem.FindSet() then
+                    repeat
+                        if FamilyItemFilter = '' then
+                            FamilyItemFilter := TempItem."No."
+                        else
+                            FamilyItemFilter += '|' + TempItem."No.";
+                    until TempItem.Next() = 0;
         end else begin
             // Product No. range filter — supports parallel range fetching from the bc-api.
             // The consumer sends $filter=productNo ge 'A' and productNo lt 'M' (OData range).
@@ -245,7 +259,11 @@ page 50318 "RGMC Item Price API v3"
         );
         PriceListLine.SetCurrentKey("Product No.", "Starting Date");
         PriceListLine.SetFilter("Starting Date", '<=%1', FilterDate);
-        if FamilyItemFilter <> '' then
+        if RequestedPLFilter <> '' then
+            PriceListLine.SetFilter("Price List Code", RequestedPLFilter)
+        else if PriceListCodeFilter <> '' then
+            PriceListLine.SetFilter("Price List Code", PriceListCodeFilter)
+        else if FamilyItemFilter <> '' then
             PriceListLine.SetFilter("Product No.", FamilyItemFilter)
         else if ProductNoFilter <> '' then
             PriceListLine.SetFilter("Product No.", ProductNoFilter);
@@ -264,7 +282,8 @@ page 50318 "RGMC Item Price API v3"
                 // ("Product No.", "Starting Date") index plan is preserved.
                 if (PriceListLine.Status = "Price Status"::Active) and
                    (StrPos(PriceListLine."Price List Code", 'IC') = 0) and
-                   ((PriceListLine."Ending Date" = 0D) or (PriceListLine."Ending Date" >= FilterDate))
+                   ((PriceListLine."Ending Date" = 0D) or (PriceListLine."Ending Date" >= FilterDate)) and
+                   ((PriceListCodeFilter = '') or TempItem.Get(PriceListLine."Product No."))
                 then begin
                     if HasPrev and (PrevLine."Product No." <> PriceListLine."Product No.") then begin
                         Position += 1;
