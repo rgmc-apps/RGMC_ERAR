@@ -265,6 +265,55 @@ salesHeaderArchives({id})/salesLineArchives
 
 ---
 
+### LSC Tender Types — Page 50336
+**Source table:** `LSC Tender Type` (99001462)
+
+| Method | URL |
+|--------|-----|
+| GET (all) | `tenderTypes` |
+| GET (single) | `tenderTypes({id})` |
+| POST | `tenderTypes` |
+| PATCH | `tenderTypes({id})` |
+| DELETE | `tenderTypes({id})` |
+
+**Fields:** `id`, `code`, `description`, `companyName`, `lastModifiedDateTime`
+
+> ⚠️ This is `LSC Tender Type` (99001462), distinct from `LSC Tender Type Setup` (99001466). Use the AL Symbol Browser to discover additional fields and extend this page as needed.
+
+---
+
+## Returns
+
+### Return Shipment Lines — Page 50337
+**Source table:** `Return Shipment Line` (6651)
+
+| Method | URL |
+|--------|-----|
+| GET (all) | `returnShipmentLines` |
+| GET (single) | `returnShipmentLines({id})` |
+| POST | `returnShipmentLines` |
+| PATCH | `returnShipmentLines({id})` |
+| DELETE | `returnShipmentLines({id})` |
+
+**Fields:** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `unitPrice`, `amount`, `amountIncludingVat`, `returnReasonCode`, `returnOrderNo`, `returnOrderLineNo`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+
+---
+
+### Return Receipt Lines — Page 50338
+**Source table:** `Return Receipt Line` (6661)
+
+| Method | URL |
+|--------|-----|
+| GET (all) | `returnReceiptLines` |
+| GET (single) | `returnReceiptLines({id})` |
+| POST | `returnReceiptLines` |
+| PATCH | `returnReceiptLines({id})` |
+| DELETE | `returnReceiptLines({id})` |
+
+**Fields:** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `unitPrice`, `amount`, `amountIncludingVat`, `returnReasonCode`, `returnOrderNo`, `returnOrderLineNo`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+
+---
+
 ## Updated Existing Endpoint
 
 ### Price List Lines — Page 50321 *(companyName added)*
@@ -301,3 +350,6 @@ salesHeaderArchives({id})/salesLineArchives
 | 50333 | `salesHeaderArchives` | Sales Header Archive | 5107 |
 | 50334 | `salesLineArchives` | Sales Line Archive | 5108 |
 | 50335 | `retailProductGroups` | LSC Retail Product Group | 10000705 |
+| 50336 | `tenderTypes` | LSC Tender Type | 99001462 |
+| 50337 | `returnShipmentLines` | Return Shipment Line | 6651 |
+| 50338 | `returnReceiptLines` | Return Receipt Line | 6661 |
