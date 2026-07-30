@@ -22,9 +22,7 @@ All endpoints below append to the base URL above. All support `GET`, `POST`, `PA
 | PATCH | `transactionHeaders({id})` |
 | DELETE | `transactionHeaders({id})` |
 
-**Fields:** `id`, `storeNo`, `posTerminalNo`, `transactionNo`, `receiptNo`, `transactionDate`, `transactionTime`, `memberCardNo`, `customerNo`, `staffId`, `netAmount`, `grossAmount`, `discountAmount`, `paymentAmount`, `changeAmount`, `noOfItems`, `currencyCode`, `transStatus`, `posted`, `statementNo`, `companyName`, `lastModifiedDateTime`
-
-**Guards:** Modify and delete blocked when `posted = true`.
+**Fields:** `id`, `storeNo`, `posTerminalNo`, `transactionNo`, `receiptNo`, `transactionDate`, `transactionTime`, `memberCardNo`, `customerNo`, `staffId`, `netAmount`, `grossAmount`, `discountAmount`, `noOfItems`, `statementNo`, `companyName`, `lastModifiedDateTime`
 
 **Nested sub-pages:**
 ```
@@ -35,7 +33,7 @@ transactionHeaders({id})/transPaymentEntries
 ---
 
 ### Transaction Sales Entries — Page 50323
-**Source table:** `LSC Transaction Sales Entry` (99001473)
+**Source table:** `LSC Trans. Sales Entry` (99001473)
 
 | Method | URL |
 |--------|-----|
@@ -46,7 +44,7 @@ transactionHeaders({id})/transPaymentEntries
 | PATCH | `transactionSalesEntries({id})` |
 | DELETE | `transactionSalesEntries({id})` |
 
-**Fields:** `id`, `storeNo`, `posTerminalNo`, `transactionNo`, `lineNo`, `receiptNo`, `transactionDate`, `transactionTime`, `itemNo`, `barcodeNo`, `description`, `variantCode`, `unitOfMeasure`, `quantity`, `price`, `netPrice`, `grossAmount`, `netAmount`, `discountAmount`, `discountPercent`, `costAmount`, `itemFamilyCode`, `staffId`, `currencyCode`, `returnEntry`, `manuallyDiscounted`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `storeNo`, `posTerminalNo`, `transactionNo`, `lineNo`, `receiptNo`, `transactionDate`, `transactionTime`, `itemNo`, `barcodeNo`, `variantCode`, `unitOfMeasure`, `quantity`, `price`, `netPrice`, `netAmount`, `discountAmount`, `discountPercent`, `costAmount`, `staffId`, `companyName`, `lastModifiedDateTime`
 
 ---
 
@@ -62,7 +60,7 @@ transactionHeaders({id})/transPaymentEntries
 | PATCH | `transPaymentEntries({id})` |
 | DELETE | `transPaymentEntries({id})` |
 
-**Fields:** `id`, `storeNo`, `posTerminalNo`, `transactionNo`, `lineNo`, `receiptNo`, `transactionDate`, `transactionTime`, `tenderType`, `tenderTypeDescription`, `amount`, `amountTendered`, `currencyCode`, `currencyFactor`, `cardOrAccountNo`, `eftAuthCode`, `staffId`, `returnEntry`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `storeNo`, `posTerminalNo`, `transactionNo`, `lineNo`, `receiptNo`, `transactionDate`, `transactionTime`, `tenderType`, `amountTendered`, `currencyCode`, `staffId`, `companyName`, `lastModifiedDateTime`
 
 ---
 
@@ -77,7 +75,9 @@ transactionHeaders({id})/transPaymentEntries
 | PATCH | `tenderTypeSetups({id})` |
 | DELETE | `tenderTypeSetups({id})` |
 
-**Fields:** `id`, `code`, `description`, `function`, `openDrawer`, `glAccountNo`, `currencyCode`, `minTenderAmount`, `maxTenderAmount`, `allowOverTender`, `allowUnderTender`, `allowNegativeTender`, `roundOffAmount`, `eft`, `eftPaymentTypeNo`, `processEftManually`, `countInTillDeclarations`, `printReceipt`, `tenderTypeGroup`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `code`, `description`, `companyName`, `lastModifiedDateTime`
+
+> ⚠️ Most optional fields on `LSC Tender Type Setup` did not exist in this BC27 installation. Use the AL Symbol Browser to discover the correct field names and extend this page if needed.
 
 ---
 
@@ -92,9 +92,7 @@ transactionHeaders({id})/transPaymentEntries
 | PATCH | `stores({id})` |
 | DELETE | `stores({id})` |
 
-**Fields:** `id`, `no`, `name`, `name2`, `address`, `address2`, `city`, `county`, `postCode`, `countryRegionCode`, `phoneNo`, `email`, `currencyCode`, `locationCode`, `inventoryLocationCode`, `responsibilityCenter`, `defaultCustomerNo`, `genBusPostingGroup`, `vatBusPostingGroup`, `customerPostingGroup`, `taxGroupCode`, `openingTime`, `closingTime`, `blocked`, `companyName`, `lastModifiedDateTime`
-
-**Guards:** Delete blocked unless `blocked = true`.
+**Fields:** `id`, `no`, `name`, `address`, `address2`, `city`, `county`, `postCode`, `phoneNo`, `email`, `currencyCode`, `locationCode`, `responsibilityCenter`, `companyName`, `lastModifiedDateTime`
 
 ---
 
@@ -170,7 +168,7 @@ transferShipmentHeaders({id})/transferShipmentLines
 | PATCH | `transferShipmentLines({id})` |
 | DELETE | `transferShipmentLines({id})` |
 
-**Fields:** `id`, `documentNo`, `lineNo`, `itemNo`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `transferOrderNo`, `transferOrderLineNo`, `transferFromCode`, `transferToCode`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `documentNo`, `lineNo`, `itemNo`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `transferOrderNo`, `transferFromCode`, `transferToCode`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
 
 ---
 
@@ -206,7 +204,7 @@ transferReceiptHeaders({id})/transferReceiptLines
 | PATCH | `transferReceiptLines({id})` |
 | DELETE | `transferReceiptLines({id})` |
 
-**Fields:** `id`, `documentNo`, `lineNo`, `itemNo`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `transferOrderNo`, `transferOrderLineNo`, `transferFromCode`, `transferToCode`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `documentNo`, `lineNo`, `itemNo`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `transferOrderNo`, `transferFromCode`, `transferToCode`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
 
 ---
 
@@ -261,9 +259,9 @@ salesHeaderArchives({id})/salesLineArchives
 | PATCH | `retailProductGroups({id})` |
 | DELETE | `retailProductGroups({id})` |
 
-**Fields:** `id`, `itemCategoryCode`, `code`, `description`, `description2`, `genProdPostingGroup`, `vatProdPostingGroup`, `inventoryPostingGroup`, `costingMethod`, `unitOfMeasure`, `unitPrice`, `unitCost`, `vendorNo`, `blocked`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `itemCategoryCode`, `code`, `description`, `companyName`, `lastModifiedDateTime`
 
-**Guards:** Delete blocked unless `blocked = true`.
+> ⚠️ Most optional fields on `LSC Retail Product Group` did not exist in this BC27 installation. Use the AL Symbol Browser to discover the correct field names and extend this page if needed.
 
 ---
 
@@ -290,7 +288,7 @@ salesHeaderArchives({id})/salesLineArchives
 |---------|-----------|--------------|-------------|
 | 50321 | `priceListLines` | Price List Line | 7001 |
 | 50322 | `transactionHeaders` | LSC Transaction Header | 99001472 |
-| 50323 | `transactionSalesEntries` | LSC Transaction Sales Entry | 99001473 |
+| 50323 | `transactionSalesEntries` | LSC Trans. Sales Entry | 99001473 |
 | 50324 | `transPaymentEntries` | LSC Trans. Payment Entry | 99001474 |
 | 50325 | `tenderTypeSetups` | LSC Tender Type Setup | 99001466 |
 | 50326 | `stores` | LSC Store | 99001470 |
