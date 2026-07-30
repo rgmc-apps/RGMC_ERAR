@@ -1,4 +1,4 @@
-page 50338 "RGMC Return Receipt Line API v2"
+page 50338 "RGMC Rtn Receipt Line API v2"
 {
     PageType = API;
     APIPublisher = 'rgmc';
@@ -6,7 +6,7 @@ page 50338 "RGMC Return Receipt Line API v2"
     APIVersion = 'v2.0';
     EntityName = 'returnReceiptLine';
     EntitySetName = 'returnReceiptLines';
-    Caption = 'RGMC Return Receipt Line API v2';
+    Caption = 'RGMC Rtn Receipt Line API v2';
 
     SourceTable = "Return Receipt Line";
     ODataKeyFields = SystemId;
@@ -71,14 +71,6 @@ page 50338 "RGMC Return Receipt Line API v2"
             field(unitPrice; Rec."Unit Price")
             {
                 Caption = 'unitPrice';
-            }
-            field(amount; Rec.Amount)
-            {
-                Caption = 'amount';
-            }
-            field(amountIncludingVat; Rec."Amount Including VAT")
-            {
-                Caption = 'amountIncludingVat';
             }
             field(returnReasonCode; Rec."Return Reason Code")
             {

@@ -1,4 +1,4 @@
-page 50337 "RGMC Return Shipment Line API v2"
+page 50337 "RGMC Rtn Shipment Line API v2"
 {
     PageType = API;
     APIPublisher = 'rgmc';
@@ -6,7 +6,7 @@ page 50337 "RGMC Return Shipment Line API v2"
     APIVersion = 'v2.0';
     EntityName = 'returnShipmentLine';
     EntitySetName = 'returnShipmentLines';
-    Caption = 'RGMC Return Shipment Line API v2';
+    Caption = 'RGMC Rtn Shipment Line API v2';
 
     SourceTable = "Return Shipment Line";
     ODataKeyFields = SystemId;
@@ -67,18 +67,6 @@ page 50337 "RGMC Return Shipment Line API v2"
             field(quantity; Rec.Quantity)
             {
                 Caption = 'quantity';
-            }
-            field(unitPrice; Rec."Unit Price")
-            {
-                Caption = 'unitPrice';
-            }
-            field(amount; Rec.Amount)
-            {
-                Caption = 'amount';
-            }
-            field(amountIncludingVat; Rec."Amount Including VAT")
-            {
-                Caption = 'amountIncludingVat';
             }
             field(returnReasonCode; Rec."Return Reason Code")
             {

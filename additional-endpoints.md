@@ -295,7 +295,9 @@ salesHeaderArchives({id})/salesLineArchives
 | PATCH | `returnShipmentLines({id})` |
 | DELETE | `returnShipmentLines({id})` |
 
-**Fields:** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `unitPrice`, `amount`, `amountIncludingVat`, `returnReasonCode`, `returnOrderNo`, `returnOrderLineNo`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `returnReasonCode`, `returnOrderNo`, `returnOrderLineNo`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+
+> `unitPrice`, `amount`, `amountIncludingVat` do not exist on `Return Shipment Line` in this BC27 installation.
 
 ---
 
@@ -310,7 +312,9 @@ salesHeaderArchives({id})/salesLineArchives
 | PATCH | `returnReceiptLines({id})` |
 | DELETE | `returnReceiptLines({id})` |
 
-**Fields:** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `unitPrice`, `amount`, `amountIncludingVat`, `returnReasonCode`, `returnOrderNo`, `returnOrderLineNo`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+**Fields:** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `variantCode`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`, `quantity`, `unitPrice`, `returnReasonCode`, `returnOrderNo`, `returnOrderLineNo`, `shortcutDimension1Code`, `shortcutDimension2Code`, `companyName`, `lastModifiedDateTime`
+
+> `amount`, `amountIncludingVat` do not exist on `Return Receipt Line` in this BC27 installation.
 
 ---
 
