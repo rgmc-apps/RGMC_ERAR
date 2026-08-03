@@ -33,6 +33,7 @@ permissionset 50302 "RGMC API EXT"
         tabledata "LSC Tender Type" = RIMD,
         tabledata "Return Shipment Line" = RIMD,
         tabledata "Return Receipt Line" = RIMD,
+        tabledata "Item Ledger Entry" = RIMD,
         tabledata "RGMC Cutoff List" = RIMD,
         tabledata "RGMC Company Settings" = RIMD;
 }
