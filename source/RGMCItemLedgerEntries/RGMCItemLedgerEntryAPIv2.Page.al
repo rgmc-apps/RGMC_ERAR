@@ -280,9 +280,9 @@ page 50339 "RGMC Item Ledger Entry API v2"
             {
                 Caption = 'countryRegionCode';
             }
-            field(area; Rec.Area)
+            field(intrastatArea; Rec.Area)
             {
-                Caption = 'area';
+                Caption = 'intrastatArea';
             }
 
             // ── LSC retail fields ────────────────────────────────────────────────

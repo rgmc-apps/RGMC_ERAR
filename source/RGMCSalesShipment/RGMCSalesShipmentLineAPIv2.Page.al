@@ -417,9 +417,9 @@ page 50340 "RGMC Sales Shpt Line API v2"
             {
                 Caption = 'exitPoint';
             }
-            field(area; Rec.Area)
+            field(intrastatArea; Rec.Area)
             {
-                Caption = 'area';
+                Caption = 'intrastatArea';
             }
 
             // ── LSC retail / delivery fields ─────────────────────────────────────
