@@ -99,10 +99,6 @@ page 50339 "RGMC Item Ledger Entry API v2"
             {
                 Caption = 'nonstock';
             }
-            field(productGroupCode; Rec."Product Group Code")
-            {
-                Caption = 'productGroupCode';
-            }
             field(purchasingCode; Rec."Purchasing Code")
             {
                 Caption = 'purchasingCode';
@@ -191,11 +187,6 @@ page 50339 "RGMC Item Ledger Entry API v2"
             {
                 Caption = 'lastInvoiceDate';
             }
-            field(crossReferenceNo; Rec."Cross-Reference No.")
-            {
-                Caption = 'crossReferenceNo';
-            }
-
             // ── Order / application ──────────────────────────────────────────────
             field(orderType; Rec."Order Type")
             {
@@ -332,13 +323,12 @@ page 50339 "RGMC Item Ledger Entry API v2"
             SystemId, "Entry No.", "Item No.", "Posting Date", "Document Date",
             "Entry Type", "Source Type", "Source No.", "Document No.", "Document Type",
             "Document Line No.", "External Document No.", "No. Series", Description,
-            "Location Code", "Variant Code", "Item Category Code", Nonstock,
-            "Product Group Code", "Purchasing Code",
+            "Location Code", "Variant Code", "Item Category Code", Nonstock, "Purchasing Code",
             "Serial No.", "Lot No.", "Batch No.", "Expiration Date", "Item Tracking", "Warranty Date",
             Quantity, "Invoiced Quantity", "Remaining Quantity", "Shipped Qty. Not Returned",
             "Unit of Measure Code", "Qty. per Unit of Measure",
             Open, Positive, Correction, "Completely Invoiced", "Drop Shipment",
-            "Assemble to Order", "Last Invoice Date", "Cross-Reference No.",
+            "Assemble to Order", "Last Invoice Date",
             "Order Type", "Order No.", "Order Line No.",
             "Return Reason Code", "Applied Entry to Adjust", "Applies-to Entry",
             "Transfer Type", "Originally Ordered No.",

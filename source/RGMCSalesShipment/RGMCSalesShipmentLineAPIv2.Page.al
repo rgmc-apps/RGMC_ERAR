@@ -103,10 +103,6 @@ page 50340 "RGMC Sales Shpt Line API v2"
             {
                 Caption = 'itemCategoryCode';
             }
-            field(productGroupCode; Rec."Product Group Code")
-            {
-                Caption = 'productGroupCode';
-            }
             field(nonstock; Rec.Nonstock)
             {
                 Caption = 'nonstock';
@@ -263,19 +259,6 @@ page 50340 "RGMC Sales Shpt Line API v2"
                 Caption = 'attachedToLineNo';
                 Editable = false;
             }
-            field(crossReferenceNo; Rec."Cross-Reference No.")
-            {
-                Caption = 'crossReferenceNo';
-            }
-            field(crossReferenceType; Rec."Cross-Reference Type")
-            {
-                Caption = 'crossReferenceType';
-            }
-            field(crossReferenceTypeNo; Rec."Cross-Reference Type No.")
-            {
-                Caption = 'crossReferenceTypeNo';
-            }
-
             // ── Order references ─────────────────────────────────────────────────
             field(orderNo; Rec."Order No.")
             {
@@ -523,7 +506,7 @@ page 50340 "RGMC Sales Shpt Line API v2"
             "Sell-to Customer No.", "Bill-to Customer No.", "Customer Price Group",
             "Customer Disc. Group", "Responsibility Center",
             "Location Code", "Bin Code", "Variant Code", "Item Category Code",
-            "Product Group Code", Nonstock, "Posting Group", "Purchasing Code",
+            Nonstock, "Posting Group", "Purchasing Code",
             Quantity, "Quantity (Base)", "Quantity Invoiced", "Qty. Invoiced (Base)",
             "Qty. Shipped Not Invoiced", "Qty. per Unit of Measure",
             "Unit of Measure", "Unit of Measure Code", "Unit of Measure Cross Ref.",
@@ -535,7 +518,6 @@ page 50340 "RGMC Sales Shpt Line API v2"
             "Tax Liable", "Tax Area Code", "Tax Group Code",
             "Item Shpt. Entry No.", "Appl.-to Item Entry", "Appl.-from Item Entry",
             "Return Reason Code", "Attached to Line No.",
-            "Cross-Reference No.", "Cross-Reference Type", "Cross-Reference Type No.",
             "Order No.", "Order Line No.", "Blanket Order No.", "Blanket Order Line No.",
             "Purchase Order No.", "Purch. Order Line No.", "Drop Shipment", "Vendor No.",
             "Job No.", "Job Task No.", "Job Contract Entry No.", "Work Type Code",
