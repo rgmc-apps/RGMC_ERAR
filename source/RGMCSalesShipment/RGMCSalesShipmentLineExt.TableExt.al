@@ -110,5 +110,31 @@ tableextension 50457 "RGMC Sales Shipment Line Ext" extends "Sales Shipment Line
             Caption = 'RGMC Company';
             DataClassification = CustomerContent;
         }
+        // GET filter parameters for lastModifiedDateTime
+        field(50477; "RGMC Modified From"; Date)
+        {
+            Caption = 'RGMC Modified From';
+            DataClassification = CustomerContent;
+        }
+        field(50478; "RGMC Modified To"; Date)
+        {
+            Caption = 'RGMC Modified To';
+            DataClassification = CustomerContent;
+        }
+        field(50479; "RGMC Modified As Of Date"; Date)
+        {
+            Caption = 'RGMC Modified As Of Date';
+            DataClassification = CustomerContent;
+        }
+        field(50480; "RGMC Modified Month"; Integer)
+        {
+            Caption = 'RGMC Modified Month';
+            DataClassification = CustomerContent;
+        }
+        field(50481; "RGMC Modified Year"; Integer)
+        {
+            Caption = 'RGMC Modified Year';
+            DataClassification = CustomerContent;
+        }
     }
 }

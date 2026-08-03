@@ -39,5 +39,31 @@ tableextension 50456 "RGMC Item Ledger Entry Ext" extends "Item Ledger Entry"
             Caption = 'RGMC Company';
             DataClassification = CustomerContent;
         }
+        // GET filter parameters for lastModifiedDateTime
+        field(50463; "RGMC Modified From"; Date)
+        {
+            Caption = 'RGMC Modified From';
+            DataClassification = CustomerContent;
+        }
+        field(50464; "RGMC Modified To"; Date)
+        {
+            Caption = 'RGMC Modified To';
+            DataClassification = CustomerContent;
+        }
+        field(50465; "RGMC Modified As Of Date"; Date)
+        {
+            Caption = 'RGMC Modified As Of Date';
+            DataClassification = CustomerContent;
+        }
+        field(50466; "RGMC Modified Month"; Integer)
+        {
+            Caption = 'RGMC Modified Month';
+            DataClassification = CustomerContent;
+        }
+        field(50467; "RGMC Modified Year"; Integer)
+        {
+            Caption = 'RGMC Modified Year';
+            DataClassification = CustomerContent;
+        }
     }
 }

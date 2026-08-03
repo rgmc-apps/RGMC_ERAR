@@ -300,6 +300,28 @@ page 50339 "RGMC Item Ledger Entry API v2"
                 Caption = 'outOfStockSubstitution';
             }
 
+            // ── Date filter parameters (GET only) ────────────────────────────────
+            field(modifiedFrom; Rec."RGMC Modified From")
+            {
+                Caption = 'modifiedFrom';
+            }
+            field(modifiedTo; Rec."RGMC Modified To")
+            {
+                Caption = 'modifiedTo';
+            }
+            field(modifiedAsOfDate; Rec."RGMC Modified As Of Date")
+            {
+                Caption = 'modifiedAsOfDate';
+            }
+            field(modifiedMonth; Rec."RGMC Modified Month")
+            {
+                Caption = 'modifiedMonth';
+            }
+            field(modifiedYear; Rec."RGMC Modified Year")
+            {
+                Caption = 'modifiedYear';
+            }
+
             // ── Metadata ─────────────────────────────────────────────────────────
             field(companyName; Rec."RGMC Company")
             {
@@ -315,8 +337,40 @@ page 50339 "RGMC Item Ledger Entry API v2"
     }
 
     trigger OnOpenPage()
+    var
+        ModifiedFrom: Date;
+        ModifiedTo: Date;
+        ModifiedAsOfDate: Date;
+        ModifiedMonth: Integer;
+        ModifiedYear: Integer;
+        FilterText: Text;
     begin
-        LoadAllCompanies();
+        FilterText := Rec.GetFilter("RGMC Modified From");
+        if FilterText <> '' then
+            Evaluate(ModifiedFrom, FilterText);
+        Rec.SetRange("RGMC Modified From");
+
+        FilterText := Rec.GetFilter("RGMC Modified To");
+        if FilterText <> '' then
+            Evaluate(ModifiedTo, FilterText);
+        Rec.SetRange("RGMC Modified To");
+
+        FilterText := Rec.GetFilter("RGMC Modified As Of Date");
+        if FilterText <> '' then
+            Evaluate(ModifiedAsOfDate, FilterText);
+        Rec.SetRange("RGMC Modified As Of Date");
+
+        FilterText := Rec.GetFilter("RGMC Modified Month");
+        if FilterText <> '' then
+            Evaluate(ModifiedMonth, FilterText);
+        Rec.SetRange("RGMC Modified Month");
+
+        FilterText := Rec.GetFilter("RGMC Modified Year");
+        if FilterText <> '' then
+            Evaluate(ModifiedYear, FilterText);
+        Rec.SetRange("RGMC Modified Year");
+
+        LoadAllCompanies(ModifiedFrom, ModifiedTo, ModifiedAsOfDate, ModifiedMonth, ModifiedYear);
     end;
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
@@ -356,18 +410,53 @@ page 50339 "RGMC Item Ledger Entry API v2"
         exit(true);
     end;
 
-    local procedure LoadAllCompanies()
+    local procedure LoadAllCompanies(ModifiedFrom: Date; ModifiedTo: Date; ModifiedAsOfDate: Date; ModifiedMonth: Integer; ModifiedYear: Integer)
     var
         Company: Record Company;
+        FilterStart: DateTime;
+        FilterEnd: DateTime;
+        CalcStart: Date;
+        CalcEnd: Date;
     begin
+        if ModifiedFrom <> 0D then
+            FilterStart := CreateDateTime(ModifiedFrom, 000000T);
+
+        if ModifiedTo <> 0D then
+            FilterEnd := CreateDateTime(ModifiedTo, 235959T);
+
+        if ModifiedAsOfDate <> 0D then
+            if (FilterEnd = 0DT) or (CreateDateTime(ModifiedAsOfDate, 235959T) < FilterEnd) then
+                FilterEnd := CreateDateTime(ModifiedAsOfDate, 235959T);
+
+        if ModifiedYear <> 0 then begin
+            if ModifiedMonth <> 0 then begin
+                CalcStart := DMY2Date(1, ModifiedMonth, ModifiedYear);
+                CalcEnd := CalcDate('<CM>', CalcStart);
+            end else begin
+                CalcStart := DMY2Date(1, 1, ModifiedYear);
+                CalcEnd := DMY2Date(31, 12, ModifiedYear);
+            end;
+            if (FilterStart = 0DT) or (CreateDateTime(CalcStart, 000000T) > FilterStart) then
+                FilterStart := CreateDateTime(CalcStart, 000000T);
+            if (FilterEnd = 0DT) or (CreateDateTime(CalcEnd, 235959T) < FilterEnd) then
+                FilterEnd := CreateDateTime(CalcEnd, 235959T);
+        end else if ModifiedMonth <> 0 then begin
+            CalcStart := DMY2Date(1, ModifiedMonth, Date2DMY(Today(), 3));
+            CalcEnd := CalcDate('<CM>', CalcStart);
+            if (FilterStart = 0DT) or (CreateDateTime(CalcStart, 000000T) > FilterStart) then
+                FilterStart := CreateDateTime(CalcStart, 000000T);
+            if (FilterEnd = 0DT) or (CreateDateTime(CalcEnd, 235959T) < FilterEnd) then
+                FilterEnd := CreateDateTime(CalcEnd, 235959T);
+        end;
+
         if Company.FindSet() then
             repeat
-                LoadCompanyData(Company.Name);
+                LoadCompanyData(Company.Name, FilterStart, FilterEnd);
             until Company.Next() = 0;
         if Rec.FindFirst() then;
     end;
 
-    local procedure LoadCompanyData(pCompany: Text[30])
+    local procedure LoadCompanyData(pCompany: Text[30]; FilterStart: DateTime; FilterEnd: DateTime)
     var
         ILESource: Record "Item Ledger Entry";
     begin
@@ -393,6 +482,12 @@ page 50339 "RGMC Item Ledger Entry API v2"
             "Out-of-Stock Substitution",
             SystemModifiedAt
         );
+        if (FilterStart <> 0DT) and (FilterEnd <> 0DT) then
+            ILESource.SetRange(SystemModifiedAt, FilterStart, FilterEnd)
+        else if FilterStart <> 0DT then
+            ILESource.SetFilter(SystemModifiedAt, '>=%1', FilterStart)
+        else if FilterEnd <> 0DT then
+            ILESource.SetFilter(SystemModifiedAt, '<=%1', FilterEnd);
         if ILESource.FindSet() then
             repeat
                 Rec.Init();
