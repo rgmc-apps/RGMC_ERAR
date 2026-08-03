@@ -318,6 +318,95 @@ salesHeaderArchives({id})/salesLineArchives
 
 ---
 
+## Inventory
+
+### Item Ledger Entries — Page 50339
+**Source table:** `Item Ledger Entry` (32)
+**Table extension:** `RGMC Item Ledger Entry Ext` (50456) — adds `transferType`, `warrantyDate`, `originallyOrderedNo`
+
+| Method | URL |
+|--------|-----|
+| GET (all) | `itemLedgerEntries` |
+| GET (single) | `itemLedgerEntries({id})` |
+| POST | `itemLedgerEntries` |
+| PATCH | `itemLedgerEntries({id})` |
+| DELETE | `itemLedgerEntries({id})` |
+
+**Fields (identity & posting):** `id`, `entryNo`, `itemNo`, `postingDate`, `documentDate`, `entryType`, `sourceType`, `sourceNo`, `documentNo`, `documentType`, `documentLineNo`, `externalDocumentNo`, `noSeries`, `description`
+
+**Fields (item & location):** `locationCode`, `variantCode`, `itemCategoryCode`, `nonstock`, `productGroupCode`, `purchasingCode`
+
+**Fields (tracking):** `serialNo`, `lotNo`, `batchNo`, `expirationDate`, `itemTracking`, `warrantyDate`
+
+**Fields (quantities):** `quantity`, `invoicedQuantity`, `remainingQuantity`, `shippedQtyNotReturned`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`
+
+**Fields (status):** `open`, `positive`, `correction`, `completelyInvoiced`, `dropShipment`, `assembleToOrder`, `lastInvoiceDate`, `crossReferenceNo`
+
+**Fields (order / application):** `orderType`, `orderNo`, `orderLineNo`, `returnReasonCode`, `appliedEntryToAdjust`, `appliesToEntry`, `transferType`, `originallyOrderedNo`
+
+**Fields (jobs):** `jobNo`, `jobTaskNo`, `jobPurchase`
+
+**Fields (dimensions):** `globalDimension1Code`, `globalDimension2Code`, `dimensionSetId`
+
+**Fields (Intrastat):** `transactionType`, `transportMethod`, `transactionSpecification`, `entryExitPoint`, `countryRegionCode`, `area`
+
+**Fields (LSC retail):** `offerNo`, `promotionNo`, `statementNo`, `biTimestamp`, `outOfStockSubstitution`
+
+**Fields (metadata):** `companyName`, `lastModifiedDateTime`
+
+> **AL0132 risk fields** (remove from field block + `SetLoadFields` if build fails): `productGroupCode` (deprecated), `purchasingCode`, `lastInvoiceDate`, `crossReferenceNo` (renamed to "Item Reference No." in BC17+), `itemTracking`, `nonstock` — also remove from `RGMCItemLedgerEntryExt.TableExt.al` any of `transferType`, `warrantyDate`, `originallyOrderedNo` that conflict with existing LSC fields.
+
+---
+
+## Sales Shipments
+
+### Sales Shipment Lines — Page 50340
+**Source table:** `Sales Shipment Line` (111)
+
+| Method | URL |
+|--------|-----|
+| GET (all) | `salesShipmentLines` |
+| GET (single) | `salesShipmentLines({id})` |
+| POST | `salesShipmentLines` |
+| PATCH | `salesShipmentLines({id})` |
+| DELETE | `salesShipmentLines({id})` |
+
+**Fields (identity & document):** `id`, `documentNo`, `lineNo`, `type`, `no`, `description`, `description2`, `postingDate`, `correction`
+
+**Fields (customer):** `sellToCustomerNo`, `billToCustomerNo`, `customerPriceGroup`, `customerDiscGroup`, `responsibilityCenter`
+
+**Fields (item & location):** `locationCode`, `binCode`, `variantCode`, `itemCategoryCode`, `productGroupCode`, `nonstock`, `postingGroup`, `purchasingCode`
+
+**Fields (quantities & UoM):** `quantity`, `quantityBase`, `quantityInvoiced`, `qtyInvoicedBase`, `qtyShippedNotInvoiced`, `qtyPerUnitOfMeasure`, `unitOfMeasure`, `unitOfMeasureCode`, `unitOfMeasureCrossRef`, `unitsPerParcel`, `netWeight`, `grossWeight`, `unitVolume`
+
+**Fields (pricing & discounts):** `unitCost`, `unitCostLcy`, `vatBaseAmount`, `allowLineDisc`, `allowInvoiceDisc`, `itemChargeBaseAmount`
+
+**Fields (VAT & posting):** `vatCalculationType`, `vatBusPostingGroup`, `vatProdPostingGroup`, `genBusPostingGroup`, `genProdPostingGroup`
+
+**Fields (Associates 365 tax):** `taxLiable`, `taxAreaCode`, `taxGroupCode`
+
+**Fields (item application & cross-reference):** `itemShptEntryNo`, `appliesToItemEntry`, `applFromItemEntry`, `returnReasonCode`, `attachedToLineNo`, `crossReferenceNo`, `crossReferenceType`, `crossReferenceTypeNo`
+
+**Fields (order references):** `orderNo`, `orderLineNo`, `blanketOrderNo`, `blanketOrderLineNo`, `purchaseOrderNo`, `purchOrderLineNo`, `dropShipment`, `vendorNo`
+
+**Fields (job):** `jobNo`, `jobTaskNo`, `jobContractEntryNo`, `workTypeCode`
+
+**Fields (dimensions):** `shortcutDimension1Code`, `shortcutDimension2Code`, `dimensionSetId`
+
+**Fields (FA / depreciation):** `faPostingDate`, `depreciationBookCode`, `deprUntilFaPostingDate`, `duplicateInDepreciationBook`, `useDuplicationList`
+
+**Fields (dates & shipping):** `shippingTime`, `outboundWhseHandlingTime`, `plannedShipmentDate`, `plannedDeliveryDate`, `requestedDeliveryDate`, `promisedDeliveryDate`, `estimatedDeliveryDate`
+
+**Fields (Intrastat):** `transactionType`, `transportMethod`, `transactionSpecification`, `exitPoint`, `area`
+
+**Fields (LSC retail / delivery):** `sourcing`, `deliverFrom`, `returnPolicy`, `deliveringMethod`, `itemTrackingNo`, `configurationId`, `deliveryUserId`, `optionValueText`, `spoWhseLocation`, `deliveryDateTime`, `noLaterThanDate`, `vendorDeliversTo`, `spoDocumentMethod`, `retailSpecialOrder`, `storeSalesLocation`, `deliveryReferenceNo`, `deliveryLocationCode`, `authorizedForCreditCard`
+
+**Fields (metadata):** `companyName`, `lastModifiedDateTime`
+
+> **AL0132 risk fields** (remove from field block + `SetLoadFields` if build fails): `exitPoint` (may be `"Entry/Exit Point"`), `postingGroup`, `unitOfMeasure` (may not exist separately from `unitOfMeasureCode`), `unitOfMeasureCrossRef`, `productGroupCode` (deprecated), `quantityInvoiced`, `estimatedDeliveryDate` — plus any LSC/Associates 365 field not present in this installation.
+
+---
+
 ## Updated Existing Endpoint
 
 ### Price List Lines — Page 50321 *(companyName added)*
@@ -357,3 +446,5 @@ salesHeaderArchives({id})/salesLineArchives
 | 50336 | `tenderTypes` | LSC Tender Type | 99001462 |
 | 50337 | `returnShipmentLines` | Return Shipment Line | 6651 |
 | 50338 | `returnReceiptLines` | Return Receipt Line | 6661 |
+| 50339 | `itemLedgerEntries` | Item Ledger Entry | 32 |
+| 50340 | `salesShipmentLines` | Sales Shipment Line | 111 |
