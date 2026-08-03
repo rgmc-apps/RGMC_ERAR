@@ -176,6 +176,10 @@ page 50340 "RGMC Sales Shpt Line API v2"
             }
 
             // ── Pricing & discounts ──────────────────────────────────────────────
+            field(unitPrice; Rec."Unit Price")
+            {
+                Caption = 'unitPrice';
+            }
             field(unitCost; Rec."Unit Cost")
             {
                 Caption = 'unitCost';
@@ -192,6 +196,10 @@ page 50340 "RGMC Sales Shpt Line API v2"
             {
                 Caption = 'allowLineDisc';
             }
+            field(lineDiscountPercent; Rec."Line Discount %")
+            {
+                Caption = 'lineDiscountPercent';
+            }
             field(allowInvoiceDisc; Rec."Allow Invoice Disc.")
             {
                 Caption = 'allowInvoiceDisc';
@@ -206,21 +214,25 @@ page 50340 "RGMC Sales Shpt Line API v2"
             {
                 Caption = 'vatCalculationType';
             }
-            field(vatBusPostingGroup; Rec."VAT Bus. Posting Group")
+            field(vatPercent; Rec."VAT %")
             {
-                Caption = 'vatBusPostingGroup';
+                Caption = 'vatPercent';
             }
-            field(vatProdPostingGroup; Rec."VAT Prod. Posting Group")
+            field(vatBusinessPostingGroup; Rec."VAT Bus. Posting Group")
             {
-                Caption = 'vatProdPostingGroup';
+                Caption = 'vatBusinessPostingGroup';
             }
-            field(genBusPostingGroup; Rec."Gen. Bus. Posting Group")
+            field(vatProductPostingGroup; Rec."VAT Prod. Posting Group")
             {
-                Caption = 'genBusPostingGroup';
+                Caption = 'vatProductPostingGroup';
             }
-            field(genProdPostingGroup; Rec."Gen. Prod. Posting Group")
+            field(generalBusinessPostingGroup; Rec."Gen. Bus. Posting Group")
             {
-                Caption = 'genProdPostingGroup';
+                Caption = 'generalBusinessPostingGroup';
+            }
+            field(generalProductPostingGroup; Rec."Gen. Prod. Posting Group")
+            {
+                Caption = 'generalProductPostingGroup';
             }
 
             // ── Tax (Associates 365) ─────────────────────────────────────────────
@@ -238,18 +250,18 @@ page 50340 "RGMC Sales Shpt Line API v2"
             }
 
             // ── Item application & cross-reference ───────────────────────────────
-            field(itemShptEntryNo; Rec."Item Shpt. Entry No.")
+            field(itemShipmentEntryNo; Rec."Item Shpt. Entry No.")
             {
-                Caption = 'itemShptEntryNo';
+                Caption = 'itemShipmentEntryNo';
                 Editable = false;
             }
             field(appliesToItemEntry; Rec."Appl.-to Item Entry")
             {
                 Caption = 'appliesToItemEntry';
             }
-            field(applFromItemEntry; Rec."Appl.-from Item Entry")
+            field(appliesFromItemEntry; Rec."Appl.-from Item Entry")
             {
-                Caption = 'applFromItemEntry';
+                Caption = 'appliesFromItemEntry';
             }
             field(returnReasonCode; Rec."Return Reason Code")
             {
@@ -360,9 +372,9 @@ page 50340 "RGMC Sales Shpt Line API v2"
             {
                 Caption = 'shippingTime';
             }
-            field(outboundWhseHandlingTime; Rec."Outbound Whse. Handling Time")
+            field(outboundWarehouseHandlingTime; Rec."Outbound Whse. Handling Time")
             {
-                Caption = 'outboundWhseHandlingTime';
+                Caption = 'outboundWarehouseHandlingTime';
             }
             field(plannedShipmentDate; Rec."Planned Shipment Date")
             {
@@ -653,9 +665,9 @@ page 50340 "RGMC Sales Shpt Line API v2"
             "Qty. Shipped Not Invoiced", "Qty. per Unit of Measure",
             "Unit of Measure", "Unit of Measure Code", "Unit of Measure Cross Ref.",
             "Units per Parcel", "Net Weight", "Gross Weight", "Unit Volume",
-            "Unit Cost", "Unit Cost (LCY)", "VAT Base Amount",
-            "Allow Line Disc.", "Allow Invoice Disc.", "Item Charge Base Amount",
-            "VAT Calculation Type", "VAT Bus. Posting Group", "VAT Prod. Posting Group",
+            "Unit Price", "Unit Cost", "Unit Cost (LCY)", "VAT Base Amount",
+            "Allow Line Disc.", "Line Discount %", "Allow Invoice Disc.", "Item Charge Base Amount",
+            "VAT Calculation Type", "VAT %", "VAT Bus. Posting Group", "VAT Prod. Posting Group",
             "Gen. Bus. Posting Group", "Gen. Prod. Posting Group",
             "Tax Liable", "Tax Area Code", "Tax Group Code",
             "Item Shpt. Entry No.", "Appl.-to Item Entry", "Appl.-from Item Entry",
