@@ -9,6 +9,7 @@ page 50340 "RGMC Sales Shpt Line API v2"
     Caption = 'RGMC Sales Shpt Line API v2';
 
     SourceTable = "Sales Shipment Line";
+    SourceTableTemporary = true;
     ODataKeyFields = SystemId;
 
     DelayedInsert = true;
@@ -259,6 +260,7 @@ page 50340 "RGMC Sales Shpt Line API v2"
                 Caption = 'attachedToLineNo';
                 Editable = false;
             }
+
             // ── Order references ─────────────────────────────────────────────────
             field(orderNo; Rec."Order No.")
             {
@@ -480,7 +482,7 @@ page 50340 "RGMC Sales Shpt Line API v2"
             }
 
             // ── Metadata ─────────────────────────────────────────────────────────
-            field(companyName; CurrentCompanyName)
+            field(companyName; Rec."RGMC Company")
             {
                 Caption = 'companyName';
                 Editable = false;
@@ -493,14 +495,65 @@ page 50340 "RGMC Sales Shpt Line API v2"
         }
     }
 
-    trigger OnAfterGetRecord()
-    begin
-        CurrentCompanyName := CompanyName();
-    end;
-
     trigger OnOpenPage()
     begin
-        Rec.SetLoadFields(
+        LoadAllCompanies();
+    end;
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        SSLRecord: Record "Sales Shipment Line";
+    begin
+        Rec.TestField("Document No.");
+        Rec.TestField("No.");
+        Rec.TestField("RGMC Company");
+        SSLRecord.ChangeCompany(Rec."RGMC Company");
+        SSLRecord.TransferFields(Rec);
+        SSLRecord.Insert(true);
+        exit(true);
+    end;
+
+    trigger OnModifyRecord(): Boolean
+    var
+        SSLRecord: Record "Sales Shipment Line";
+    begin
+        Rec.TestField("RGMC Company");
+        SSLRecord.ChangeCompany(Rec."RGMC Company");
+        if SSLRecord.Get(Rec."Document No.", Rec."Line No.") then begin
+            SSLRecord.TransferFields(Rec);
+            SSLRecord.Modify(true);
+        end;
+        exit(true);
+    end;
+
+    trigger OnDeleteRecord(): Boolean
+    var
+        SSLRecord: Record "Sales Shipment Line";
+    begin
+        Rec.TestField("RGMC Company");
+        SSLRecord.ChangeCompany(Rec."RGMC Company");
+        if SSLRecord.Get(Rec."Document No.", Rec."Line No.") then
+            SSLRecord.Delete(true);
+        exit(true);
+    end;
+
+    local procedure LoadAllCompanies()
+    var
+        Company: Record Company;
+    begin
+        if Company.FindSet() then
+            repeat
+                LoadCompanyData(Company.Name);
+            until Company.Next() = 0;
+        if Rec.FindFirst() then;
+    end;
+
+    local procedure LoadCompanyData(pCompany: Text[30])
+    var
+        SSLSource: Record "Sales Shipment Line";
+    begin
+        SSLSource.ChangeCompany(pCompany);
+        SSLSource.SetLoadFields(
             SystemId, "Document No.", "Line No.", Type, "No.", Description, "Description 2",
             "Posting Date", Correction,
             "Sell-to Customer No.", "Bill-to Customer No.", "Customer Price Group",
@@ -537,25 +590,13 @@ page 50340 "RGMC Sales Shpt Line API v2"
             "Delivery Reference No", "Delivery Location Code", "Authorized for Credit Card",
             SystemModifiedAt
         );
+        if SSLSource.FindSet() then
+            repeat
+                Rec.Init();
+                Rec.TransferFields(SSLSource);
+                Rec."RGMC Company" := CopyStr(pCompany, 1, 30);
+                Rec.SystemId := CreateGuid();
+                if Rec.Insert() then;
+            until SSLSource.Next() = 0;
     end;
-
-    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
-    begin
-        Rec.TestField("Document No.");
-        Rec.TestField("No.");
-        exit(true);
-    end;
-
-    trigger OnModifyRecord(): Boolean
-    begin
-        exit(true);
-    end;
-
-    trigger OnDeleteRecord(): Boolean
-    begin
-        exit(true);
-    end;
-
-    var
-        CurrentCompanyName: Text[30];
 }

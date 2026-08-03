@@ -9,6 +9,7 @@ page 50339 "RGMC Item Ledger Entry API v2"
     Caption = 'RGMC Item Ledger Entry API v2';
 
     SourceTable = "Item Ledger Entry";
+    SourceTableTemporary = true;
     ODataKeyFields = SystemId;
 
     DelayedInsert = true;
@@ -187,6 +188,7 @@ page 50339 "RGMC Item Ledger Entry API v2"
             {
                 Caption = 'lastInvoiceDate';
             }
+
             // ── Order / application ──────────────────────────────────────────────
             field(orderType; Rec."Order Type")
             {
@@ -299,7 +301,7 @@ page 50339 "RGMC Item Ledger Entry API v2"
             }
 
             // ── Metadata ─────────────────────────────────────────────────────────
-            field(companyName; CurrentCompanyName)
+            field(companyName; Rec."RGMC Company")
             {
                 Caption = 'companyName';
                 Editable = false;
@@ -312,14 +314,65 @@ page 50339 "RGMC Item Ledger Entry API v2"
         }
     }
 
-    trigger OnAfterGetRecord()
-    begin
-        CurrentCompanyName := CompanyName();
-    end;
-
     trigger OnOpenPage()
     begin
-        Rec.SetLoadFields(
+        LoadAllCompanies();
+    end;
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        ILERecord: Record "Item Ledger Entry";
+    begin
+        Rec.TestField("Item No.");
+        Rec.TestField("RGMC Company");
+        ILERecord.ChangeCompany(Rec."RGMC Company");
+        ILERecord.TransferFields(Rec);
+        ILERecord.Insert(true);
+        Rec."Entry No." := ILERecord."Entry No.";
+        exit(true);
+    end;
+
+    trigger OnModifyRecord(): Boolean
+    var
+        ILERecord: Record "Item Ledger Entry";
+    begin
+        Rec.TestField("RGMC Company");
+        ILERecord.ChangeCompany(Rec."RGMC Company");
+        if ILERecord.Get(Rec."Entry No.") then begin
+            ILERecord.TransferFields(Rec);
+            ILERecord.Modify(true);
+        end;
+        exit(true);
+    end;
+
+    trigger OnDeleteRecord(): Boolean
+    var
+        ILERecord: Record "Item Ledger Entry";
+    begin
+        Rec.TestField("RGMC Company");
+        ILERecord.ChangeCompany(Rec."RGMC Company");
+        if ILERecord.Get(Rec."Entry No.") then
+            ILERecord.Delete(true);
+        exit(true);
+    end;
+
+    local procedure LoadAllCompanies()
+    var
+        Company: Record Company;
+    begin
+        if Company.FindSet() then
+            repeat
+                LoadCompanyData(Company.Name);
+            until Company.Next() = 0;
+        if Rec.FindFirst() then;
+    end;
+
+    local procedure LoadCompanyData(pCompany: Text[30])
+    var
+        ILESource: Record "Item Ledger Entry";
+    begin
+        ILESource.ChangeCompany(pCompany);
+        ILESource.SetLoadFields(
             SystemId, "Entry No.", "Item No.", "Posting Date", "Document Date",
             "Entry Type", "Source Type", "Source No.", "Document No.", "Document Type",
             "Document Line No.", "External Document No.", "No. Series", Description,
@@ -340,24 +393,13 @@ page 50339 "RGMC Item Ledger Entry API v2"
             "Out-of-Stock Substitution",
             SystemModifiedAt
         );
+        if ILESource.FindSet() then
+            repeat
+                Rec.Init();
+                Rec.TransferFields(ILESource);
+                Rec."RGMC Company" := CopyStr(pCompany, 1, 30);
+                Rec.SystemId := CreateGuid();
+                if Rec.Insert() then;
+            until ILESource.Next() = 0;
     end;
-
-    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
-    begin
-        Rec.TestField("Item No.");
-        exit(true);
-    end;
-
-    trigger OnModifyRecord(): Boolean
-    begin
-        exit(true);
-    end;
-
-    trigger OnDeleteRecord(): Boolean
-    begin
-        exit(true);
-    end;
-
-    var
-        CurrentCompanyName: Text[30];
 }

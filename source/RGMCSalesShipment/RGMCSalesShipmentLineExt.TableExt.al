@@ -105,5 +105,10 @@ tableextension 50457 "RGMC Sales Shipment Line Ext" extends "Sales Shipment Line
             Caption = 'Delivery Location Code';
             DataClassification = CustomerContent;
         }
+        field(50476; "RGMC Company"; Code[30])
+        {
+            Caption = 'RGMC Company';
+            DataClassification = CustomerContent;
+        }
     }
 }

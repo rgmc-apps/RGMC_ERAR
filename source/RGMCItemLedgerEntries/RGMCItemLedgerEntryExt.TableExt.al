@@ -34,5 +34,10 @@ tableextension 50456 "RGMC Item Ledger Entry Ext" extends "Item Ledger Entry"
             Caption = 'BI Timestamp';
             DataClassification = CustomerContent;
         }
+        field(50462; "RGMC Company"; Code[30])
+        {
+            Caption = 'RGMC Company';
+            DataClassification = CustomerContent;
+        }
     }
 }
