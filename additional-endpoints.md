@@ -322,7 +322,7 @@ salesHeaderArchives({id})/salesLineArchives
 
 ### Item Ledger Entries — Page 50339
 **Source table:** `Item Ledger Entry` (32)
-**Table extension:** `RGMC Item Ledger Entry Ext` (50456) — adds `transferType`, `warrantyDate`, `originallyOrderedNo`
+**Table extension:** `RGMC Item Ledger Entry Ext` (50456) — adds `Transfer Type`, `Batch No.`, `Offer No.`, `Promotion No.`, `Statement No.`, `BI Timestamp` as RGMC custom fields. `Warranty Date` and `Originally Ordered No.` are already defined by Base Application and are exposed directly.
 
 | Method | URL |
 |--------|-----|
@@ -334,27 +334,35 @@ salesHeaderArchives({id})/salesLineArchives
 
 **Fields (identity & posting):** `id`, `entryNo`, `itemNo`, `postingDate`, `documentDate`, `entryType`, `sourceType`, `sourceNo`, `documentNo`, `documentType`, `documentLineNo`, `externalDocumentNo`, `noSeries`, `description`
 
-**Fields (item & location):** `locationCode`, `variantCode`, `itemCategoryCode`, `nonstock`, `productGroupCode`, `purchasingCode`
+**Fields (item & location):** `locationCode`, `variantCode`, `itemCategoryCode`, `nonstock`, `purchasingCode`
 
-**Fields (tracking):** `serialNo`, `lotNo`, `batchNo`, `expirationDate`, `itemTracking`, `warrantyDate`
+**Fields (tracking):** `serialNo`, `lotNo`, `batchNo`†, `expirationDate`, `itemTracking`, `warrantyDate`
 
 **Fields (quantities):** `quantity`, `invoicedQuantity`, `remainingQuantity`, `shippedQtyNotReturned`, `unitOfMeasureCode`, `qtyPerUnitOfMeasure`
 
-**Fields (status):** `open`, `positive`, `correction`, `completelyInvoiced`, `dropShipment`, `assembleToOrder`, `lastInvoiceDate`, `crossReferenceNo`
+**Fields (status):** `open`, `positive`, `correction`, `completelyInvoiced`, `dropShipment`, `assembleToOrder`, `lastInvoiceDate`
 
-**Fields (order / application):** `orderType`, `orderNo`, `orderLineNo`, `returnReasonCode`, `appliedEntryToAdjust`, `appliesToEntry`, `transferType`, `originallyOrderedNo`
+**Fields (order / application):** `orderType`, `orderNo`, `orderLineNo`, `returnReasonCode`, `appliedEntryToAdjust`, `appliesToEntry`, `transferType`†, `originallyOrderedNo`
 
 **Fields (jobs):** `jobNo`, `jobTaskNo`, `jobPurchase`
 
 **Fields (dimensions):** `globalDimension1Code`, `globalDimension2Code`, `dimensionSetId`
 
-**Fields (Intrastat):** `transactionType`, `transportMethod`, `transactionSpecification`, `entryExitPoint`, `countryRegionCode`, `area`
+**Fields (Intrastat):** `transactionType`, `transportMethod`, `transactionSpecification`, `entryExitPoint`, `countryRegionCode`, `intrastatArea`
 
-**Fields (LSC retail):** `offerNo`, `promotionNo`, `statementNo`, `biTimestamp`, `outOfStockSubstitution`
+**Fields (LSC retail / RGMC ext):** `offerNo`†, `promotionNo`†, `statementNo`†, `biTimestamp`†, `outOfStockSubstitution`
 
 **Fields (metadata):** `companyName`, `lastModifiedDateTime`
 
-> **AL0132 risk fields** (remove from field block + `SetLoadFields` if build fails): `productGroupCode` (deprecated), `purchasingCode`, `lastInvoiceDate`, `crossReferenceNo` (renamed to "Item Reference No." in BC17+), `itemTracking`, `nonstock` — also remove from `RGMCItemLedgerEntryExt.TableExt.al` any of `transferType`, `warrantyDate`, `originallyOrderedNo` that conflict with existing LSC fields.
+> † Field is added by `RGMC Item Ledger Entry Ext` (TableExt 50456) — value will be blank until populated via POST/PATCH.
+
+#### API property name differences from BC column names
+
+| BC Column Name | API Property Name | Reason |
+|---|---|---|
+| `Area` | `intrastatArea` | `area` is a reserved keyword in AL (used in page layouts as `area(Content)`) |
+| `Product Group Code` | *(removed)* | Not present on Table 32 in this BC27 installation (deprecated in BC17+) |
+| `Cross-Reference No.` | *(removed)* | Renamed to `Item Reference No.` in BC17+; not present on Table 32 here |
 
 ---
 
@@ -362,6 +370,7 @@ salesHeaderArchives({id})/salesLineArchives
 
 ### Sales Shipment Lines — Page 50340
 **Source table:** `Sales Shipment Line` (111)
+**Table extension:** `RGMC Sales Shipment Line Ext` (50457) — adds 20 fields absent from Table 111 in this BC27+LSC installation (see field name table below).
 
 | Method | URL |
 |--------|-----|
@@ -375,9 +384,9 @@ salesHeaderArchives({id})/salesLineArchives
 
 **Fields (customer):** `sellToCustomerNo`, `billToCustomerNo`, `customerPriceGroup`, `customerDiscGroup`, `responsibilityCenter`
 
-**Fields (item & location):** `locationCode`, `binCode`, `variantCode`, `itemCategoryCode`, `productGroupCode`, `nonstock`, `postingGroup`, `purchasingCode`
+**Fields (item & location):** `locationCode`, `binCode`, `variantCode`, `itemCategoryCode`, `nonstock`, `postingGroup`, `purchasingCode`
 
-**Fields (quantities & UoM):** `quantity`, `quantityBase`, `quantityInvoiced`, `qtyInvoicedBase`, `qtyShippedNotInvoiced`, `qtyPerUnitOfMeasure`, `unitOfMeasure`, `unitOfMeasureCode`, `unitOfMeasureCrossRef`, `unitsPerParcel`, `netWeight`, `grossWeight`, `unitVolume`
+**Fields (quantities & UoM):** `quantity`, `quantityBase`, `quantityInvoiced`, `qtyInvoicedBase`, `qtyShippedNotInvoiced`, `qtyPerUnitOfMeasure`, `unitOfMeasure`, `unitOfMeasureCode`, `unitOfMeasureCrossRef`†, `unitsPerParcel`, `netWeight`, `grossWeight`, `unitVolume`
 
 **Fields (pricing & discounts):** `unitCost`, `unitCostLcy`, `vatBaseAmount`, `allowLineDisc`, `allowInvoiceDisc`, `itemChargeBaseAmount`
 
@@ -385,9 +394,9 @@ salesHeaderArchives({id})/salesLineArchives
 
 **Fields (Associates 365 tax):** `taxLiable`, `taxAreaCode`, `taxGroupCode`
 
-**Fields (item application & cross-reference):** `itemShptEntryNo`, `appliesToItemEntry`, `applFromItemEntry`, `returnReasonCode`, `attachedToLineNo`, `crossReferenceNo`, `crossReferenceType`, `crossReferenceTypeNo`
+**Fields (item application):** `itemShptEntryNo`, `appliesToItemEntry`, `applFromItemEntry`, `returnReasonCode`, `attachedToLineNo`
 
-**Fields (order references):** `orderNo`, `orderLineNo`, `blanketOrderNo`, `blanketOrderLineNo`, `purchaseOrderNo`, `purchOrderLineNo`, `dropShipment`, `vendorNo`
+**Fields (order references):** `orderNo`, `orderLineNo`, `blanketOrderNo`, `blanketOrderLineNo`, `purchaseOrderNo`, `purchOrderLineNo`, `dropShipment`, `vendorNo`†
 
 **Fields (job):** `jobNo`, `jobTaskNo`, `jobContractEntryNo`, `workTypeCode`
 
@@ -395,15 +404,47 @@ salesHeaderArchives({id})/salesLineArchives
 
 **Fields (FA / depreciation):** `faPostingDate`, `depreciationBookCode`, `deprUntilFaPostingDate`, `duplicateInDepreciationBook`, `useDuplicationList`
 
-**Fields (dates & shipping):** `shippingTime`, `outboundWhseHandlingTime`, `plannedShipmentDate`, `plannedDeliveryDate`, `requestedDeliveryDate`, `promisedDeliveryDate`, `estimatedDeliveryDate`
+**Fields (dates & shipping):** `shippingTime`, `outboundWhseHandlingTime`, `plannedShipmentDate`, `plannedDeliveryDate`, `requestedDeliveryDate`, `promisedDeliveryDate`, `estimatedDeliveryDate`†
 
-**Fields (Intrastat):** `transactionType`, `transportMethod`, `transactionSpecification`, `exitPoint`, `area`
+**Fields (Intrastat):** `transactionType`, `transportMethod`, `transactionSpecification`, `exitPoint`, `intrastatArea`
 
-**Fields (LSC retail / delivery):** `sourcing`, `deliverFrom`, `returnPolicy`, `deliveringMethod`, `itemTrackingNo`, `configurationId`, `deliveryUserId`, `optionValueText`, `spoWhseLocation`, `deliveryDateTime`, `noLaterThanDate`, `vendorDeliversTo`, `spoDocumentMethod`, `retailSpecialOrder`, `storeSalesLocation`, `deliveryReferenceNo`, `deliveryLocationCode`, `authorizedForCreditCard`
+**Fields (LSC retail / delivery — all via RGMC ext†):** `sourcing`, `deliverFrom`, `returnPolicy`, `deliveringMethod`, `itemTrackingNo`, `configurationId`, `deliveryUserId`, `optionValueText`, `spoWhseLocation`, `deliveryDateTime`, `noLaterThanDate`, `vendorDeliversTo`, `spoDocumentMethod`, `retailSpecialOrder`, `storeSalesLocation`, `deliveryReferenceNo`, `deliveryLocationCode`
+
+**Fields (Associates 365 / standard):** `authorizedForCreditCard`
 
 **Fields (metadata):** `companyName`, `lastModifiedDateTime`
 
-> **AL0132 risk fields** (remove from field block + `SetLoadFields` if build fails): `exitPoint` (may be `"Entry/Exit Point"`), `postingGroup`, `unitOfMeasure` (may not exist separately from `unitOfMeasureCode`), `unitOfMeasureCrossRef`, `productGroupCode` (deprecated), `quantityInvoiced`, `estimatedDeliveryDate` — plus any LSC/Associates 365 field not present in this installation.
+> † Field is added by `RGMC Sales Shipment Line Ext` (TableExt 50457) — value will be blank until populated via POST/PATCH.
+
+#### API property name differences from BC column names
+
+| BC Column Name | API Property Name | Reason |
+|---|---|---|
+| `Area` | `intrastatArea` | `area` is a reserved keyword in AL (used in page layouts as `area(Content)`) |
+| `Product Group Code` | *(removed)* | Not present on Table 111 in this BC27 installation (deprecated in BC17+) |
+| `Cross-Reference No.` | *(removed)* | Renamed to `Item Reference No.` in BC17+; not present on Table 111 here |
+| `Cross-Reference Type` | *(removed)* | Renamed in BC17+; not present on Table 111 here |
+| `Cross-Reference Type No.` | *(removed)* | Renamed in BC17+; not present on Table 111 here |
+| `Unit of Measure Cross Ref.` | `unitOfMeasureCrossRef`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Vendor No.` | `vendorNo`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Estimated Delivery Date` | `estimatedDeliveryDate`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Sourcing` | `sourcing`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Deliver from` | `deliverFrom`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Return Policy` | `returnPolicy`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Delivering Method` | `deliveringMethod`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Item Tracking No.` | `itemTrackingNo`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Configuration ID` | `configurationId`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Delivery User ID` | `deliveryUserId`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Option Value Text` | `optionValueText`† | Not on Table 111 natively; added via TableExt 50457 |
+| `SPO Whse Location` | `spoWhseLocation`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Delivery Date Time` | `deliveryDateTime`† | Not on Table 111 natively; added via TableExt 50457 |
+| `No later than Date` | `noLaterThanDate`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Vendor Delivers to` | `vendorDeliversTo`† | Not on Table 111 natively; added via TableExt 50457 |
+| `SPO Document Method` | `spoDocumentMethod`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Retail Special Order` | `retailSpecialOrder`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Store Sales Location` | `storeSalesLocation`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Delivery Reference No` | `deliveryReferenceNo`† | Not on Table 111 natively; added via TableExt 50457 |
+| `Delivery Location Code` | `deliveryLocationCode`† | Not on Table 111 natively; added via TableExt 50457 |
 
 ---
 
