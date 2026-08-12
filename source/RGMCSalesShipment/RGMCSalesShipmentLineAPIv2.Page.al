@@ -515,6 +515,19 @@ page 50340 "RGMC Sales Shpt Line API v2"
                 Caption = 'modifiedYear';
             }
 
+            // ── Pagination parameters (GET only) ─────────────────────────────────
+            // When limit > 0, the page loads only from the current execution company
+            // (CompanyName()) rather than all companies, enabling per-company paging.
+            // limit = 0 (default) keeps the legacy behaviour: all companies are loaded.
+            field(limit; Rec."RGMC Limit")
+            {
+                Caption = 'limit';
+            }
+            field(offset; Rec."RGMC Offset")
+            {
+                Caption = 'offset';
+            }
+
             // ── Metadata ─────────────────────────────────────────────────────────
             field(companyName; Rec."RGMC Company")
             {
@@ -536,6 +549,8 @@ page 50340 "RGMC Sales Shpt Line API v2"
         ModifiedAsOfDate: Date;
         ModifiedMonth: Integer;
         ModifiedYear: Integer;
+        RequestedLimit: Integer;
+        RequestedOffset: Integer;
         FilterText: Text;
     begin
         FilterText := Rec.GetFilter("RGMC Modified From");
@@ -563,7 +578,17 @@ page 50340 "RGMC Sales Shpt Line API v2"
             Evaluate(ModifiedYear, FilterText);
         Rec.SetRange("RGMC Modified Year");
 
-        LoadAllCompanies(ModifiedFrom, ModifiedTo, ModifiedAsOfDate, ModifiedMonth, ModifiedYear);
+        RequestedLimit := 0;
+        if Rec.GetFilter("RGMC Limit") <> '' then
+            RequestedLimit := Rec.GetRangeMin("RGMC Limit");
+        Rec.SetRange("RGMC Limit");
+
+        RequestedOffset := 0;
+        if Rec.GetFilter("RGMC Offset") <> '' then
+            RequestedOffset := Rec.GetRangeMin("RGMC Offset");
+        Rec.SetRange("RGMC Offset");
+
+        LoadAllCompanies(ModifiedFrom, ModifiedTo, ModifiedAsOfDate, ModifiedMonth, ModifiedYear, RequestedLimit, RequestedOffset);
     end;
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
@@ -603,7 +628,7 @@ page 50340 "RGMC Sales Shpt Line API v2"
         exit(true);
     end;
 
-    local procedure LoadAllCompanies(ModifiedFrom: Date; ModifiedTo: Date; ModifiedAsOfDate: Date; ModifiedMonth: Integer; ModifiedYear: Integer)
+    local procedure LoadAllCompanies(ModifiedFrom: Date; ModifiedTo: Date; ModifiedAsOfDate: Date; ModifiedMonth: Integer; ModifiedYear: Integer; RequestedLimit: Integer; RequestedOffset: Integer)
     var
         Company: Record Company;
         FilterStart: DateTime;
@@ -642,17 +667,34 @@ page 50340 "RGMC Sales Shpt Line API v2"
                 FilterEnd := CreateDateTime(CalcEnd, 235959T);
         end;
 
-        if Company.FindSet() then
-            repeat
-                LoadCompanyData(Company.Name, FilterStart, FilterEnd);
-            until Company.Next() = 0;
+        // Paged mode: limit > 0 means the caller handles per-company pagination.
+        // Only load from the current execution company to avoid duplicating data
+        // when the worker pool iterates companies and calls per company_id.
+        if RequestedLimit > 0 then
+            LoadCompanyData(CompanyName(), FilterStart, FilterEnd, RequestedLimit, RequestedOffset)
+        else begin
+            // Legacy mode: load from all companies in one shot (used by the Python
+            // "ALL company" path which calls once with company_name=<any> and merges).
+            if Company.FindSet() then
+                repeat
+                    LoadCompanyData(Company.Name, FilterStart, FilterEnd, 0, 0);
+                until Company.Next() = 0;
+        end;
+
         if Rec.FindFirst() then;
     end;
 
-    local procedure LoadCompanyData(pCompany: Text[30]; FilterStart: DateTime; FilterEnd: DateTime)
+    local procedure LoadCompanyData(pCompany: Text[30]; FilterStart: DateTime; FilterEnd: DateTime; pLimit: Integer; pOffset: Integer)
     var
         SSLSource: Record "Sales Shipment Line";
+        EffectiveLimit: Integer;
+        Position: Integer;
+        InsertCount: Integer;
     begin
+        EffectiveLimit := pLimit;
+        if EffectiveLimit <= 0 then
+            EffectiveLimit := 2147483647;
+
         SSLSource.ChangeCompany(pCompany);
         SSLSource.SetLoadFields(
             SystemId, "Document No.", "Line No.", Type, "No.", Description, "Description 2",
@@ -697,13 +739,22 @@ page 50340 "RGMC Sales Shpt Line API v2"
             SSLSource.SetFilter(SystemModifiedAt, '>=%1', FilterStart)
         else if FilterEnd <> 0DT then
             SSLSource.SetFilter(SystemModifiedAt, '<=%1', FilterEnd);
+
+        Position := 0;
+        InsertCount := 0;
         if SSLSource.FindSet() then
             repeat
-                Rec.Init();
-                Rec.TransferFields(SSLSource);
-                Rec."RGMC Company" := CopyStr(pCompany, 1, 30);
-                Rec.SystemId := CreateGuid();
-                if Rec.Insert() then;
-            until SSLSource.Next() = 0;
+                Position += 1;
+                if Position > pOffset then begin
+                    Rec.Init();
+                    Rec.TransferFields(SSLSource);
+                    Rec."RGMC Company" := CopyStr(pCompany, 1, 30);
+                    Rec."RGMC Limit" := pLimit;
+                    Rec."RGMC Offset" := pOffset;
+                    Rec.SystemId := CreateGuid();
+                    if Rec.Insert() then;
+                    InsertCount += 1;
+                end;
+            until (SSLSource.Next() = 0) or (InsertCount >= EffectiveLimit);
     end;
 }

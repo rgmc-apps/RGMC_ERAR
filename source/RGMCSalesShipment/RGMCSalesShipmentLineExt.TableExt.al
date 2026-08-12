@@ -136,5 +136,15 @@ tableextension 50457 "RGMC Sales Shipment Line Ext" extends "Sales Shipment Line
             Caption = 'RGMC Modified Year';
             DataClassification = CustomerContent;
         }
+        field(50482; "RGMC Limit"; Integer)
+        {
+            Caption = 'RGMC Limit';
+            DataClassification = CustomerContent;
+        }
+        field(50483; "RGMC Offset"; Integer)
+        {
+            Caption = 'RGMC Offset';
+            DataClassification = CustomerContent;
+        }
     }
 }
