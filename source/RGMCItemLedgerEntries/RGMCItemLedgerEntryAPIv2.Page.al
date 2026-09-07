@@ -136,6 +136,14 @@ page 50339 "RGMC Item Ledger Entry API v2"
             {
                 Caption = 'quantity';
             }
+            field(costAmountActual; Rec."Cost Amount (Actual)")
+            {
+                Caption = 'costAmountActual';
+            }
+            field(salesAmountActual; Rec."Sales Amount (Actual)")
+            {
+                Caption = 'salesAmountActual';
+            }
             field(invoicedQuantity; Rec."Invoiced Quantity")
             {
                 Caption = 'invoicedQuantity';
@@ -521,7 +529,8 @@ page 50339 "RGMC Item Ledger Entry API v2"
             "Document Line No.", "External Document No.", "No. Series", Description,
             "Location Code", "Variant Code", "Item Category Code", Nonstock, "Purchasing Code",
             "Serial No.", "Lot No.", "Batch No.", "Expiration Date", "Item Tracking", "Warranty Date",
-            Quantity, "Invoiced Quantity", "Remaining Quantity", "Shipped Qty. Not Returned",
+            Quantity, "Cost Amount (Actual)", "Sales Amount (Actual)",
+            "Invoiced Quantity", "Remaining Quantity", "Shipped Qty. Not Returned",
             "Unit of Measure Code", "Qty. per Unit of Measure",
             Open, Positive, Correction, "Completely Invoiced", "Drop Shipment",
             "Assemble to Order", "Last Invoice Date",
