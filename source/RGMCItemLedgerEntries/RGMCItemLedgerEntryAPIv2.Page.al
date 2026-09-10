@@ -230,7 +230,7 @@ page 50339 "RGMC Item Ledger Entry API v2"
             {
                 Caption = 'originallyOrderedNo';
             }
-            field(originallyOrderedVariantCode; Rec."Orig. Ordered Variant Code")
+            field(originallyOrderedVariantCode; Rec."Originally Ordered Variant Code")
             {
                 Caption = 'originallyOrderedVariantCode';
             }
@@ -536,7 +536,7 @@ page 50339 "RGMC Item Ledger Entry API v2"
             "Assemble to Order", "Last Invoice Date",
             "Order Type", "Order No.", "Order Line No.",
             "Return Reason Code", "Applied Entry to Adjust", "Applies-to Entry",
-            "Transfer Type", "Originally Ordered No.", "Orig. Ordered Variant Code",
+            "Transfer Type", "Originally Ordered No.", "Originally Ordered Variant Code",
             "Derived From Blanket Order", "Prod. Order Comp. Line No.",
             "Job No.", "Job Task No.", "Job Purchase",
             "Global Dimension 1 Code", "Global Dimension 2 Code", "Dimension Set ID",
