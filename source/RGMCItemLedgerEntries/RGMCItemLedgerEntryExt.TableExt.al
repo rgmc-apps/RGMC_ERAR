@@ -75,7 +75,7 @@ tableextension 50456 "RGMC Item Ledger Entry Ext" extends "Item Ledger Entry"
             Caption = 'RGMC Offset';
             DataClassification = CustomerContent;
         }
-        field(50470; "Originally Ordered Variant Code"; Code[10])
+        field(50470; "Orig. Ordered Variant Code"; Code[10])
         {
             Caption = 'Originally Ordered Variant Code';
             DataClassification = CustomerContent;
