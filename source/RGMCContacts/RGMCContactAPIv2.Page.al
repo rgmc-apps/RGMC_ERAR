@@ -134,6 +134,13 @@ page 50308 "RGMC Contact API v2"
                 EntitySetName = 'contactBrandTags';
                 SubPageLink = "Contact No." = field("No.");
             }
+            part(customerTags; "RGMC Contact Cust Tag API v2")
+            {
+                Caption = 'customerTags';
+                EntityName = 'customerTag';
+                EntitySetName = 'customerTags';
+                SubPageLink = "Contact No." = field("No.");
+            }
         }
     }
 
