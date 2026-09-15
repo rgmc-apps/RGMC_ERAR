@@ -68,6 +68,21 @@ page 50315 "RGMC Sales Order API v2"
             {
                 Caption = 'requestedDeliveryDate';
             }
+            field(shipmentDate; Rec."Shipment Date")
+            {
+                Caption = 'shipmentDate';
+                Importance = Additional;
+            }
+            field(dueDate; Rec."Due Date")
+            {
+                Caption = 'dueDate';
+                Importance = Additional;
+            }
+            field(postingDescription; Rec."Posting Description")
+            {
+                Caption = 'postingDescription';
+                Importance = Additional;
+            }
             field(locationCode; Rec."Location Code")
             {
                 Caption = 'locationCode';

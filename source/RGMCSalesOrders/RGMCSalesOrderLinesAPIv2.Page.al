@@ -106,6 +106,11 @@ page 50316 "RGMC Sales Order Lines API v2"
             {
                 Caption = 'shipmentDate';
             }
+            field(postingGroup; Rec."Posting Group")
+            {
+                Caption = 'postingGroup';
+                Importance = Additional;
+            }
             field(locationCode; Rec."Location Code")
             {
                 Caption = 'locationCode';
