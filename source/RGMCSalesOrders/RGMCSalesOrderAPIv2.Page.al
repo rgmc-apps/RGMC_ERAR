@@ -83,6 +83,11 @@ page 50315 "RGMC Sales Order API v2"
                 Caption = 'postingDescription';
                 Importance = Additional;
             }
+            field(shipToCode; Rec."Ship-to Code")
+            {
+                Caption = 'shipToCode';
+                Importance = Additional;
+            }
             field(locationCode; Rec."Location Code")
             {
                 Caption = 'locationCode';
