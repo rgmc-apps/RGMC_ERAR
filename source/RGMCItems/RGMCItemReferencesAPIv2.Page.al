@@ -1,4 +1,4 @@
-page 50347 "RGMC Item References API v2"
+page 50349 "RGMC Item References API v2"
 {
     PageType = API;
     APIPublisher = 'rgmc';
