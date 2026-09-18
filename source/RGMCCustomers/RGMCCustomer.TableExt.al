@@ -18,5 +18,11 @@ tableextension 50450 "RGMC Customer" extends Customer
                       "No." = field("No.")));
             Editable = false;
         }
+        field(50452; "Chain"; Boolean)
+        {
+            Caption = 'Chain';
+            DataClassification = CustomerContent;
+            InitValue = true;
+        }
     }
 }

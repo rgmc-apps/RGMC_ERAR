@@ -80,6 +80,10 @@ page 50306 "RGMC Customer API v2"
                     Caption = 'brand', Locked = true;
                     Editable = false;
                 }
+                field(chain; Rec."Chain")
+                {
+                    Caption = 'chain', Locked = true;
+                }
             }
         }
     }
