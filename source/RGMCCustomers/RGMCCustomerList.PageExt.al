@@ -10,6 +10,12 @@ pageextension 50493 "RGMC Customer List" extends "Customer List"
                 ApplicationArea = All;
                 ToolTip = 'Specifies the brand code synced from the Brand dimension value assigned to this customer.';
             }
+            field(Chain; Rec.Chain)
+            {
+                Caption = 'Chain';
+                ApplicationArea = All;
+                ToolTip = 'Specifies whether this customer is a chain customer.';
+            }
         }
     }
 

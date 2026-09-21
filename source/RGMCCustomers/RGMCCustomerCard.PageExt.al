@@ -43,6 +43,12 @@ pageextension 50494 "RGMC Customer Card" extends "Customer Card"
                     CurrPage.Update(false);
                 end;
             }
+            field(Chain; Rec.Chain)
+            {
+                Caption = 'Chain';
+                ApplicationArea = All;
+                ToolTip = 'Specifies whether this customer is a chain customer.';
+            }
         }
     }
 
