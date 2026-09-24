@@ -33,6 +33,11 @@ table 50301 "RGMC Company Settings"
             Caption = 'Business Profile Id';
             DataClassification = CustomerContent;
         }
+        field(6; "Food Consignment Visible"; Boolean)
+        {
+            Caption = 'Food Consignment Visible';
+            DataClassification = CustomerContent;
+        }
     }
 
     keys

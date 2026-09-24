@@ -32,6 +32,11 @@ page 50491 "RGMC Company Settings List"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the business profile ID of the company.';
                 }
+                field("Food Consignment Visible"; Rec."Food Consignment Visible")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies whether this company is visible for food consignment.';
+                }
                 field("Consignment App Visible"; Rec."Consignment App Visible")
                 {
                     ApplicationArea = All;

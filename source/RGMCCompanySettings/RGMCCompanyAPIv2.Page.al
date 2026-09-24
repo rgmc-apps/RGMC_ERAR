@@ -50,6 +50,10 @@ page 50492 "RGMC Company Settings API"
                 {
                     Caption = 'consignmentAppVisible', Locked = true;
                 }
+                field(foodConsignmentVisible; Rec."Food Consignment Visible")
+                {
+                    Caption = 'foodConsignmentVisible', Locked = true;
+                }
             }
         }
     }
@@ -69,6 +73,7 @@ page 50492 "RGMC Company Settings API"
                     CompanySettings."Evaluation Company" := Company."Evaluation Company";
                     CompanySettings."Business Profile Id" := Company."Business Profile Id";
                     CompanySettings."Consignment App Visible" := false;
+                    CompanySettings."Food Consignment Visible" := false;
                     CompanySettings.Insert(true);
                 end else begin
                     // Only write if something actually changed — avoids a write lock on every GET
