@@ -23,6 +23,12 @@ pageextension 50490 "RGMC Companies" extends Companies
                     CompanySettings.Modify(true);
                 end;
             }
+            field("Food Consignment Visible"; Rec."Food Consignment Visible")
+            {
+                Caption = 'Food Consignment Visible';
+                ApplicationArea = All;
+                ToolTip = 'Specifies whether this company is visible for food consignment.';
+            }
         }
     }
 
