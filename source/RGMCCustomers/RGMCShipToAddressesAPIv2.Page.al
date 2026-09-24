@@ -53,6 +53,10 @@ page 50350 "RGMC Ship-To Addresses API v2"
                 {
                     Caption = 'shipmentMethodCode';
                 }
+                field(lookupCode; Rec."Lookup Code")
+                {
+                    Caption = 'lookupCode';
+                }
             }
         }
     }
