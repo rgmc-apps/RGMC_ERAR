@@ -84,6 +84,11 @@ page 50306 "RGMC Customer API v2"
                 {
                     Caption = 'chain', Locked = true;
                 }
+                field(lastModifiedDateTime; Rec.SystemModifiedAt)
+                {
+                    Caption = 'lastModifiedDateTime';
+                    Editable = false;
+                }
             }
         }
     }
