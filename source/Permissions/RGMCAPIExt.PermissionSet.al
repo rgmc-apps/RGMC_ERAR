@@ -8,6 +8,7 @@ permissionset 50302 "RGMC API EXT"
         tabledata Customer = RIMD,
         tabledata Contact = RIMD,
         tabledata Item = R,
+        tabledata "Item Unit of Measure" = R,
         tabledata "LSC Item Family" = R,
         tabledata "LSC Transaction Header" = RIMD,
         tabledata "LSC Trans. Sales Entry" = RIMD,
