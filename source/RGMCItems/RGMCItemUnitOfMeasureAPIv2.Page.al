@@ -1,4 +1,4 @@
-page 50353 "RGMC Item Unit Of Measure API v2"
+page 50353 "RGMC Item UOM API v2"
 {
     PageType = API;
     APIPublisher = 'rgmc';
@@ -6,7 +6,7 @@ page 50353 "RGMC Item Unit Of Measure API v2"
     APIVersion = 'v2.0';
     EntityName = 'itemUnitOfMeasure';
     EntitySetName = 'itemUnitsOfMeasure';
-    Caption = 'RGMC Item Unit Of Measure API v2';
+    Caption = 'RGMC Item UOM API v2';
 
     SourceTable = "Item Unit of Measure";
     ODataKeyFields = SystemId;

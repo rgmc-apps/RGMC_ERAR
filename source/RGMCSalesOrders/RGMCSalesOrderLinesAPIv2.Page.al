@@ -34,7 +34,7 @@ page 50316 "RGMC Sales Order Lines API v2"
             field(lineNo; Rec."Line No.")
             {
                 Caption = 'lineNo';
-                Editable = false;
+                Editable = true;
             }
             field(lineType; Rec.Type)
             {

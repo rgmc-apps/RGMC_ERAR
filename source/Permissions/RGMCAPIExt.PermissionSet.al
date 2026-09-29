@@ -44,5 +44,6 @@ permissionset 50302 "RGMC API EXT"
         tabledata "RGMC Company Settings" = RIMD,
         tabledata "RGMC Contact Customer Tag" = RIMD,
         tabledata "Warehouse Activity Header" = RIMD,
-        tabledata "Warehouse Activity Line" = RIMD;
+        tabledata "Warehouse Activity Line" = RIMD,
+        tabledata "Reservation Entry" = RID;
 }
