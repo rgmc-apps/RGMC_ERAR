@@ -84,6 +84,11 @@ page 50306 "RGMC Customer API v2"
                 {
                     Caption = 'chain', Locked = true;
                 }
+                field(prodShelfLife; Rec."RGMC Prod Shelf Life")
+                {
+                    Caption = 'prodShelfLife', Locked = true;
+                    Editable = false;
+                }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
                 {
                     Caption = 'lastModifiedDateTime';

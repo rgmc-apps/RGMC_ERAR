@@ -24,5 +24,16 @@ tableextension 50450 "RGMC Customer" extends Customer
             DataClassification = CustomerContent;
             InitValue = true;
         }
+        // Named distinctly (not "Prod Shelf Life") — that exact name already
+        // exists on Customer via a different, already-installed extension
+        // (app ID c028b96e-f3ce-449e-8455-0d725060bf26), and BC rejects two
+        // apps declaring the same field name on the same table at publish
+        // time. This is RGMC's own, independent field.
+        field(50453; "RGMC Prod Shelf Life"; Integer)
+        {
+            Caption = 'RGMC Prod Shelf Life';
+            DataClassification = CustomerContent;
+            MinValue = 0;
+        }
     }
 }

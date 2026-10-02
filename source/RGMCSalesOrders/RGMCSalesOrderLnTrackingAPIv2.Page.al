@@ -101,8 +101,10 @@ page 50355 "RGMC Sales Ln Tracking API v2"
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
-        MirrorEntry: Record "Reservation Entry";
-        NextEntryNo: Integer;
+        ReservEntryTemplate: Record "Reservation Entry" temporary;
+        InsertedReservEntry: Record "Reservation Entry";
+        CreateReservEntry: Codeunit "Create Reserv. Entry";
+        QtyBase: Decimal;
     begin
         Rec.TestField("Item No.");
         Rec.TestField("Source ID");
@@ -110,51 +112,56 @@ page 50355 "RGMC Sales Ln Tracking API v2"
         if (Rec."Lot No." = '') and (Rec."Serial No." = '') then
             Error('Either Lot No. or Serial No. must be set.');
 
-        Rec."Source Type" := Database::"Sales Line";
         if Rec."Source Subtype" = 0 then
-            Rec."Source Subtype" := 1; // Order
-        Rec."Source Prod. Order Line" := 0;
-        Rec."Reservation Status" := Rec."Reservation Status"::Tracking;
-        Rec.Positive := false; // demand — consumed from a Sales Line, not supply
+            Rec."Source Subtype" := 1; // Sales Header "Document Type"::Order
 
-        // Demand entries are stored with a negative sign; accept a positive
-        // quantity from the caller (matching the app's own line quantity)
-        // and normalize the sign here so API consumers never have to guess.
-        if Rec."Quantity (Base)" > 0 then
-            Rec."Quantity (Base)" := -Rec."Quantity (Base)";
-        Rec."Qty. to Handle (Base)" := Rec."Quantity (Base)";
-        Rec."Qty. to Invoice (Base)" := Rec."Quantity (Base)";
+        QtyBase := Rec."Quantity (Base)";
+        if QtyBase < 0 then
+            QtyBase := -QtyBase;
 
-        Rec."Creation Date" := Today;
-        Rec."Created By" := CopyStr(UserId(), 1, MaxStrLen(Rec."Created By"));
+        // Three prior versions of this trigger all failed differently: a
+        // raw single-row Insert(), a hand-built Positive=No/Yes pair, and a
+        // Create Reserv. Entry call using Reservation Status::Tracking with
+        // a non-temporary template carrying Source Type/Subtype/Source ID/
+        // Source Ref. No. — the last of which still errored with "Source
+        // Type must have a value ... Entry No.=0", meaning some OTHER
+        // internal record (not our template) was still being built without
+        // it, consistent with Tracking status requiring a genuine paired
+        // counterpart this codeunit couldn't construct from a single call.
+        //
+        // Traced to a real, working, public BC extension
+        // (FBakkensen/CreateTrackingAndReservation,
+        // ReleaseSalesDocumentSub.Codeunit.al) that does exactly this —
+        // assign a lot to a Sales Line via Create Reserv. Entry without a
+        // true reservation. Two things there differ from every attempt
+        // above: the template is TEMPORARY and carries ONLY Lot No./Serial
+        // No. (Source Type/Subtype/Source ID/Source Ref. No. come from the
+        // CreateReservEntryFor scalar params, not the template), and the
+        // final status is Reservation Status::SURPLUS, not Tracking —
+        // Surplus is the single-row, no-counterpart-needed status for a
+        // plain tracking assignment; Tracking is what demanded the paired
+        // structure every earlier attempt kept failing to build correctly.
+        // Quantities passed to CreateReservEntryFor are POSITIVE there too
+        // (the codeunit derives the correct sign from source doc context).
+        ReservEntryTemplate."Lot No." := Rec."Lot No.";
+        ReservEntryTemplate."Serial No." := Rec."Serial No.";
 
-        // Reservation Entry's real primary key is Entry No. + Positive, not
-        // Entry No. alone — every entry Business Central itself creates
-        // (even a plain Item Tracking assignment, Reservation Status =
-        // Tracking, not a true reservation against distinct supply) exists
-        // as a PAIR sharing one Entry No.: a Positive=No demand half and a
-        // Positive=Yes half. The posting engine looks up that Positive=Yes
-        // counterpart unconditionally, regardless of Reservation Status —
-        // omitting it (as this page originally did) posts fine at first but
-        // fails later at Sales Order posting with "The Reservation Entry
-        // does not exist. ... Positive='Yes'". Since this is tracking, not a
-        // reservation against genuinely different inbound supply, the mirror
-        // half references the same source document — it exists to satisfy
-        // the paired-record structure, not to link separate inventory.
-        MirrorEntry.LockTable();
-        if MirrorEntry.FindLast() then
-            NextEntryNo := MirrorEntry."Entry No." + 1
-        else
-            NextEntryNo := 1;
-        Rec."Entry No." := NextEntryNo;
+        CreateReservEntry.CreateReservEntryFor(
+            Database::"Sales Line", Rec."Source Subtype", Rec."Source ID", '', 0, Rec."Source Ref. No.",
+            Rec."Qty. per Unit of Measure", QtyBase, QtyBase, ReservEntryTemplate);
 
-        MirrorEntry.Init();
-        MirrorEntry.Copy(Rec);
-        MirrorEntry.Positive := true;
-        MirrorEntry."Quantity (Base)" := -Rec."Quantity (Base)"; // mirrors Rec's negative demand as a positive counterpart
-        MirrorEntry."Qty. to Handle (Base)" := MirrorEntry."Quantity (Base)";
-        MirrorEntry."Qty. to Invoice (Base)" := MirrorEntry."Quantity (Base)";
-        MirrorEntry.Insert(false);
+        if Rec."Expiration Date" <> 0D then
+            CreateReservEntry.SetDates(0D, Rec."Expiration Date");
+
+        CreateReservEntry.CreateEntry(
+            Rec."Item No.", Rec."Variant Code", Rec."Location Code", '', 0D, 0D, 0,
+            Enum::"Reservation Status"::Surplus);
+
+        // Reload Rec from the entry the codeunit actually persisted (real
+        // Entry No., Positive, etc.) instead of Rec's own never-inserted
+        // in-memory field values, so the API response reflects a real row.
+        CreateReservEntry.GetLastInsertReservEntry(InsertedReservEntry);
+        Rec.TransferFields(InsertedReservEntry);
 
         exit(true);
     end;

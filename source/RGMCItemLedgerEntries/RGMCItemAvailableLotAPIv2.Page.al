@@ -59,6 +59,16 @@ page 50354 "RGMC Item Available Lot API v2"
                 Caption = 'remainingQuantity';
                 Editable = false;
             }
+            field(reservedQuantity; Rec."Reserved Quantity")
+            {
+                // "Remaining Quantity" alone overstates what's actually free
+                // to promise: it drops as stock ships/is invoiced, but does
+                // NOT drop when a quantity is reserved by another (even
+                // unposted) sales order line — reservedQuantity is what the
+                // food backend subtracts to get the true available number.
+                Caption = 'reservedQuantity';
+                Editable = false;
+            }
             field(unitOfMeasureCode; Rec."Unit of Measure Code")
             {
                 Caption = 'unitOfMeasureCode';
@@ -89,11 +99,16 @@ page 50354 "RGMC Item Available Lot API v2"
 
     trigger OnOpenPage()
     begin
+        // "Reserved Quantity" is a FlowField (CalcFormula, not a stored
+        // column) — SetLoadFields alone does not compute it; SetAutoCalcFields
+        // does, at fetch time, the same mechanism already used for Customer's
+        // "Brand" FlowField in RGMCCustomerAPIv2.Page.al.
         Rec.SetLoadFields(
             SystemId, "Entry No.", "Item No.", "Lot No.", "Serial No.",
             "Expiration Date", Quantity, "Remaining Quantity",
             "Unit of Measure Code", "Location Code", "Posting Date",
             Positive, Open
         );
+        Rec.SetAutoCalcFields("Reserved Quantity");
     end;
 }

@@ -30,6 +30,10 @@ page 50315 "RGMC Sales Order API v2"
             {
                 Caption = 'number';
             }
+            field(noSeries; Rec."No. Series")
+            {
+                Caption = 'noSeries';
+            }
             field(status; Rec.Status)
             {
                 Caption = 'status';

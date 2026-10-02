@@ -50,6 +50,11 @@ page 50310 "RGMC Item API v2"
                 Caption = 'familyCode';
                 Editable = false;
             }
+            field(inventoryPostingGroup; Rec."Inventory Posting Group")
+            {
+                Caption = 'inventoryPostingGroup';
+                Editable = false;
+            }
             field(baseUnitOfMeasure; Rec."Base Unit of Measure")
             {
                 Caption = 'baseUnitOfMeasure';
@@ -86,6 +91,7 @@ page 50310 "RGMC Item API v2"
         Rec.SetLoadFields(
             SystemId, "No.", Description, "Description 2",
             "Item Category Code", "LSC Item Family Code",
+            "Inventory Posting Group",
             "Base Unit of Measure", "Unit Price", "Unit Cost",
             Blocked, SystemModifiedAt
         );
