@@ -33,6 +33,7 @@ page 50315 "RGMC Sales Order API v2"
             field(noSeries; Rec."No. Series")
             {
                 Caption = 'noSeries';
+                Editable = true;
             }
             field(status; Rec.Status)
             {

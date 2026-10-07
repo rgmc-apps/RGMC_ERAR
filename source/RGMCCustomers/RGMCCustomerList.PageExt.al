@@ -2,6 +2,15 @@ pageextension 50493 "RGMC Customer List" extends "Customer List"
 {
     layout
     {
+        addafter(Name)
+        {
+            field(Address; Rec.Address)
+            {
+                Caption = 'Address';
+                ApplicationArea = All;
+                ToolTip = 'Specifies the address.';
+            }
+        }
         addlast(Control1)
         {
             field("Brand Code"; Rec."Brand Code")
