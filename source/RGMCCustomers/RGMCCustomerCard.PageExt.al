@@ -54,6 +54,18 @@ pageextension 50494 "RGMC Customer Card" extends "Customer Card"
 
     actions
     {
+        addafter(ShipToAddresses)
+        {
+            action(AILookupNames)
+            {
+                ApplicationArea = All;
+                Caption = 'AI Lookup Names';
+                Image = List;
+                RunObject = page "RGMC AI Lookup Name List";
+                RunPageLink = "Customer No." = field("No.");
+                ToolTip = 'View or edit the alternate customer names recognized from uploaded purchase order documents, used to match incoming POs to this customer.';
+            }
+        }
     }
 
     trigger OnAfterGetRecord()

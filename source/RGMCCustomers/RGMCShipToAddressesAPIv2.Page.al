@@ -57,6 +57,14 @@ page 50350 "RGMC Ship-To Addresses API v2"
                 {
                     Caption = 'lookupCode';
                 }
+                field(legacyCode; Rec."Legacy Code")
+                {
+                    Caption = 'legacyCode';
+                }
+                field(aiLookupBranchName; Rec."AI Lookup Branch Name")
+                {
+                    Caption = 'aiLookupBranchName';
+                }
             }
         }
     }

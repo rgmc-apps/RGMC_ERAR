@@ -8,6 +8,7 @@ permissionset 50302 "RGMC API EXT"
         tabledata Customer = RIMD,
         tabledata Contact = RIMD,
         tabledata Item = R,
+        tabledata "Item Reference" = R,
         tabledata "Item Unit of Measure" = R,
         tabledata "LSC Item Family" = R,
         tabledata "LSC Transaction Header" = RIMD,
@@ -43,6 +44,8 @@ permissionset 50302 "RGMC API EXT"
         tabledata "RGMC Cutoff List" = RIMD,
         tabledata "RGMC Company Settings" = RIMD,
         tabledata "RGMC Contact Customer Tag" = RIMD,
+        tabledata "RGMC AI Lookup Name List" = RIMD,
+        tabledata "RGMC AI Lookup Branch Name" = RIMD,
         tabledata "Warehouse Activity Header" = RIMD,
         tabledata "Warehouse Activity Line" = RIMD,
         tabledata "Reservation Entry" = RID;

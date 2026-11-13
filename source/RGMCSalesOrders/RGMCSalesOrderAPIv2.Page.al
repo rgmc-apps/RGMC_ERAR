@@ -135,10 +135,27 @@ page 50315 "RGMC Sales Order API v2"
     end;
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        NoSeries: Codeunit "No. Series";
+        RequestedSeries: Code[20];
     begin
         Rec.TestField("Sell-to Customer No.");
         Rec.TestField("Posting Date");
-        exit(true);
+
+        // BC's own insert (Base App default series, or an LS Central event
+        // subscriber keyed off Location Code) can silently reassign the
+        // company default series instead of honoring an explicit "No.
+        // Series" value posted through this API — confirmed in prod: SBIC
+        // food-consignment orders requesting SO-ONLINE kept landing on
+        // S-ORDER. A post-insert Rename is not an option (BC blocks renaming
+        // a Sales Header outright), so assign the number ourselves up front:
+        // standard insert logic only auto-numbers when "No." is still blank.
+        RequestedSeries := Rec."No. Series";
+        if RequestedSeries <> '' then
+            Rec."No." := NoSeries.GetNextNo(RequestedSeries, Rec."Posting Date");
+
+        Rec.Insert(true);
+        exit(false);
     end;
 
     trigger OnModifyRecord(): Boolean
